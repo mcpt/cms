@@ -1,0 +1,20 @@
+[console_scripts]
+cmsAdaptContest = cmstestsuite.AdaptContest:main
+cmsAddUser = cmscontrib.AddUser:main
+cmsComputeComplexity = cmscontrib.ComputeComplexity:main
+cmsContestExporter = cmscontrib.ContestExporter:main
+cmsContestImporter = cmscontrib.ContestImporter:main
+cmsDumpUpdater = cmscontrib.DumpUpdater:main
+cmsImporter = cmscontrib.Importer:main
+cmsMake = cmstaskenv.cmsMake:main
+cmsRWSHelper = cmscontrib.RWSHelper:main
+cmsReimporter = cmscontrib.Reimporter:main
+cmsRemoveTask = cmscontrib.RemoveTask:main
+cmsRemoveUser = cmscontrib.RemoveUser:main
+cmsReplayContest = cmstestsuite.ReplayContest:main
+cmsRunTests = cmstestsuite.RunTests:main
+cmsSpoolExporter = cmscontrib.SpoolExporter:main
+cmsTestFileCacher = cmstestsuite.TestFileCacher:main
+cmsYamlImporter = cmscompat.YamlImporter:main
+cmsYamlReimporter = cmscompat.YamlReimporter:main
+
