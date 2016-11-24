@@ -37,7 +37,7 @@ from collections import namedtuple
 from sqlalchemy.orm import joinedload
 
 from cms import config, \
-    LANG_C, LANG_CPP, LANG_PASCAL, LANG_PYTHON, LANG_PHP, LANG_JAVA, LANG_TURING \
+    LANG_C, LANG_CPP, LANG_PASCAL, LANG_PYTHON, LANG_PHP, LANG_JAVA, LANG_TURING, \
     SCORE_MODE_MAX
 from cms.db import Submission
 from cms.grading.Sandbox import Sandbox
@@ -354,6 +354,7 @@ def compilation_step(sandbox, commands):
     """
     # Set sandbox parameters suitable for compilation.
     sandbox.dirs += [("/etc", None, None)]
+    sandbox.add_mapped_directories(["/home/wlmacadmin/tprolog/support"])
     sandbox.preserve_env = True
     sandbox.max_processes = None
     sandbox.timeout = 10
@@ -510,6 +511,7 @@ def evaluation_step_before_run(sandbox, command,
     """
     # Default parameters handling.
     allow_dirs = [] if allow_dirs is None else allow_dirs
+    allow_dirs.append("/home/wlmacadmin/tprolog/support")
     writable_files = [] if writable_files is None else writable_files
 
     # Set sandbox parameters suitable for evaluation.
