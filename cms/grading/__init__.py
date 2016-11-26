@@ -37,7 +37,7 @@ from collections import namedtuple
 from sqlalchemy.orm import joinedload
 
 from cms import config, \
-    LANG_C, LANG_CPP, LANG_PASCAL, LANG_PYTHON, LANG_PHP, LANG_JAVA, LANG_TURING \
+    LANG_C, LANG_CPP, LANG_PASCAL, LANG_PYTHON, LANG_PHP, LANG_JAVA, LANG_TURING, \
     SCORE_MODE_MAX
 from cms.db import Submission
 from cms.grading.Sandbox import Sandbox
@@ -227,8 +227,7 @@ def get_compilation_commands(language, source_filenames, executable_filename,
         command = ["/usr/bin/g++"]
         if for_evaluation:
             command += ["-DEVAL"]
-        command += ["-static", "-O2", "-std=c++11",
-                    "-o", executable_filename]
+        command += ["-static", "-O2", "-o", executable_filename]
         command += source_filenames
         commands.append(command)
     elif language == LANG_PASCAL:

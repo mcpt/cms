@@ -242,12 +242,8 @@ cmstestsuite/TestCleanCheckout.py
 cmstestsuite/TestService.py
 cmstestsuite/Tests.py
 cmstestsuite/__init__.py
-cmstestsuite/code/communication-correct.c
-cmstestsuite/code/communication-correct.cpp
 cmstestsuite/code/communication-correct.java
 cmstestsuite/code/communication-correct.pas
-cmstestsuite/code/communication-incorrect.c
-cmstestsuite/code/communication-incorrect.cpp
 cmstestsuite/code/communication-incorrect.java
 cmstestsuite/code/communication-incorrect.pas
 cmstestsuite/code/compile-fail.c
@@ -287,12 +283,7 @@ cmstestsuite/code/half-correct-stdio.php
 cmstestsuite/code/half-correct-stdio.py
 cmstestsuite/code/incorrect-fileio-emptyoutput.c
 cmstestsuite/code/incorrect-fileio-nooutput.c
-cmstestsuite/code/incorrect-fileio-with-stdio.c
-cmstestsuite/code/incorrect-fileio-with-stdio.cpp
 cmstestsuite/code/incorrect-fileio-with-stdio.java
-cmstestsuite/code/incorrect-fileio-with-stdio.pas
-cmstestsuite/code/incorrect-fileio-with-stdio.php
-cmstestsuite/code/incorrect-fileio-with-stdio.py
 cmstestsuite/code/incorrect-fileio.c
 cmstestsuite/code/incorrect-fileio.cpp
 cmstestsuite/code/incorrect-fileio.java
