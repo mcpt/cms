@@ -33,7 +33,7 @@ import yaml
 from datetime import timedelta
 
 from cms import LANGUAGES, LANGUAGE_TO_HEADER_EXT_MAP, \
-    SCORE_MODE_MAX, SCORE_MODE_MAX_TOKENED_LAST
+    SCORE_MODE_MAX, SCORE_MODE_MAX_TOKENED_LAST, SCORE_MODE_ECOO, SCORE_MODE_MAX_JDCC
 from cmscommon.datetime import make_datetime
 from cms.db import Contest, User, Task, Statement, Attachment, \
     SubmissionFormatElement, Dataset, Manager, Testcase
@@ -387,6 +387,10 @@ class YamlLoader(Loader):
             args["score_mode"] = SCORE_MODE_MAX
         elif conf.get("score_mode", None) == SCORE_MODE_MAX_TOKENED_LAST:
             args["score_mode"] = SCORE_MODE_MAX_TOKENED_LAST
+        elif conf.get("score_mode", None) == SCORE_MODE_ECOO:
+            args["score_mode"] = SCORE_MODE_ECOO
+        elif conf.get("score_mode", None) == SCORE_MODE_MAX_JDCC:
+            args["score_mode"] = SCORE_MODE_MAX_JDCC
 
         # Use the new token settings format if detected.
         if "token_mode" in conf:

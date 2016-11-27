@@ -39,7 +39,7 @@ __all__ = [
     "SOURCE_EXT_TO_LANGUAGE_MAP",
     "LANGUAGE_TO_SOURCE_EXT_MAP", "LANGUAGE_TO_HEADER_EXT_MAP",
     "LANGUAGE_TO_OBJ_EXT_MAP",
-    "SCORE_MODE_MAX", "SCORE_MODE_MAX_TOKENED_LAST",
+    "SCORE_MODE_MAX", "SCORE_MODE_MAX_TOKENED_LAST", "SCORE_MODE_ECOO", "SCORE_MODE_MAX_JDCC",
     # log
     # Nothing intended for external use, no need to advertise anything.
     # util
@@ -121,6 +121,10 @@ LANGUAGE_TO_OBJ_EXT_MAP = {
 SCORE_MODE_MAX = "max"
 # Maximum score among all tokened submissions and the last submission.
 SCORE_MODE_MAX_TOKENED_LAST = "max_tokened_last"
+# ECOO scoring style (last score with time bonus and "perfect" bonus)
+SCORE_MODE_ECOO = "ecoo"
+# Maximum score among all tokened submissions with ECOO-like scoring style
+SCORE_MODE_MAX_JDCC = "max_jdcc"
 
 from .util import ConfigError, mkdir, utf8_decoder, Address, ServiceCoord, \
     get_safe_shard, get_service_address, get_service_shards, \

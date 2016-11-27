@@ -19,7 +19,7 @@ $("select[name=task_type_{{ dataset.id }}]").change(function() {
 
 {% block core %}
 {% from cms.server import format_dataset_attrs %}
-{% from cms import plugin_list, SCORE_MODE_MAX_TOKENED_LAST, SCORE_MODE_MAX %}
+{% from cms import plugin_list, SCORE_MODE_MAX_TOKENED_LAST, SCORE_MODE_MAX, SCORE_MODE_ECOO, SCORE_MODE_MAX_JDCC %}
 {% set task_type_list = plugin_list("cms.grading.tasktypes", "tasktypes") %}
 {% set score_type_list = plugin_list("cms.grading.scoretypes", "scoretypes") %}
 
@@ -358,6 +358,8 @@ $("select[name=task_type_{{ dataset.id }}]").change(function() {
           <select name="score_mode">
             <option value="{{ SCORE_MODE_MAX_TOKENED_LAST }}" {{ "selected" if task.score_mode == SCORE_MODE_MAX_TOKENED_LAST else "" }}>Use best among tokened and last submissions (IOI 2010-2012)</option>
             <option value="{{ SCORE_MODE_MAX }}" {{ "selected" if task.score_mode == SCORE_MODE_MAX else "" }}>Use best among all submissions (IOI 2013-)</option>
+            <option value="{{ SCORE_MODE_ECOO }}" {{ "selected" if task.score_mode == SCORE_MODE_ECOO else "" }}>ECOO scoring</option>
+            <option value="{{ SCORE_MODE_MAX_JDCC }}" {{ "selected" if task.score_mode == SCORE_MODE_MAX_JDCC else "" }}>JDCC scoring</option>
           </select>
         </td>
       </tr>

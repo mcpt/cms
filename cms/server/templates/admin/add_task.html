@@ -14,7 +14,7 @@ $("select[name=task_type]").change(showTaskTypeOption);
 {% end %}
 
 {% block core %}
-{% from cms import plugin_list, SCORE_MODE_MAX_TOKENED_LAST, SCORE_MODE_MAX %}
+{% from cms import plugin_list, SCORE_MODE_MAX_TOKENED_LAST, SCORE_MODE_MAX, SCORE_MODE_ECOO, SCORE_MODE_MAX_JDCC %}
 {% set task_type_list = plugin_list("cms.grading.tasktypes", "tasktypes") %}
 {% set score_type_list = plugin_list("cms.grading.scoretypes", "scoretypes") %}
 
@@ -198,6 +198,8 @@ $("select[name=task_type]").change(showTaskTypeOption);
           <select name="score_mode">
             <option value="{{ SCORE_MODE_MAX_TOKENED_LAST }}" selected>Use best among tokened and last submissions (IOI 2010-2012)</option>
             <option value="{{ SCORE_MODE_MAX }}">Use best among all submissions (IOI 2013-)</option>
+            <option value="{{ SCORE_MODE_ECOO }}">ECOO scoring</option>
+            <option value="{{ SCORE_MODE_MAX_JDCC }}">JDCC scoring</option>
           </select>
         </td>
       </tr>

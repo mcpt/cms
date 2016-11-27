@@ -38,7 +38,7 @@ from sqlalchemy.orm import joinedload
 
 from cms import config, \
     LANG_C, LANG_CPP, LANG_PASCAL, LANG_PYTHON, LANG_PHP, LANG_JAVA, LANG_TURING, \
-    SCORE_MODE_MAX
+    SCORE_MODE_MAX, SCORE_MODE_MAX_TOKENED_LAST, SCORE_MODE_ECOO, SCORE_MODE_MAX_JDCC
 from cms.db import Submission
 from cms.grading.Sandbox import Sandbox
 
