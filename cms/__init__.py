@@ -34,12 +34,8 @@ import cms.log
 # Define what this package will provide.
 
 __all__ = [
-    "LANG_C", "LANG_CPP", "LANG_PASCAL", "LANG_PYTHON", "LANG_PHP",
-    "LANGUAGE_NAMES", "LANGUAGES", "DEFAULT_LANGUAGES",
-    "SOURCE_EXT_TO_LANGUAGE_MAP",
-    "LANGUAGE_TO_SOURCE_EXT_MAP", "LANGUAGE_TO_HEADER_EXT_MAP",
-    "LANGUAGE_TO_OBJ_EXT_MAP",
-    "SCORE_MODE_MAX", "SCORE_MODE_MAX_TOKENED_LAST", "SCORE_MODE_ECOO", "SCORE_MODE_MAX_JDCC",
+    "__version__",
+    "SCORE_MODE_MAX", "SCORE_MODE_MAX_TOKENED_LAST",
     # log
     # Nothing intended for external use, no need to advertise anything.
     # util
@@ -53,67 +49,11 @@ __all__ = [
 ]
 
 
+__version__ = '1.3.rc0'
+
+
 # Instantiate or import these objects.
 
-# Shorthand codes for all supported languages.
-LANG_C = "c"
-LANG_CPP = "cpp"
-LANG_PASCAL = "pas"
-LANG_PYTHON = "py"
-LANG_PHP = "php"
-LANG_JAVA = "java"
-LANG_TURING = "tur"
-
-LANGUAGE_NAMES = {
-    LANG_C: "C",
-    LANG_CPP: "C++",
-    LANG_PASCAL: "Pascal",
-    LANG_PYTHON: "Python",
-    LANG_PHP: "PHP",
-    LANG_JAVA: "Java",
-    LANG_TURING: "Turing",
-}
-
-LANGUAGES = [LANG_C, LANG_CPP, LANG_PASCAL, LANG_PYTHON, LANG_PHP, \
-			LANG_JAVA, LANG_TURING]
-DEFAULT_LANGUAGES = [LANG_C, LANG_CPP, LANG_PASCAL]
-
-# A reference for extension-based automatic language detection.
-# (It's more difficult with headers because ".h" is ambiguous.)
-SOURCE_EXT_TO_LANGUAGE_MAP = {
-    ".c": LANG_C,
-    ".cpp": LANG_CPP,
-    ".cxx": LANG_CPP,
-    ".cc": LANG_CPP,
-    ".C": LANG_CPP,
-    ".c++": LANG_CPP,
-    ".pas": LANG_PASCAL,
-    ".py": LANG_PYTHON,
-    ".php": LANG_PHP,
-    ".java": LANG_JAVA,
-    ".t": LANG_TURING,
-}
-
-# Our preferred source file and header file extension for each language.
-LANGUAGE_TO_SOURCE_EXT_MAP = {
-    LANG_C: ".c",
-    LANG_CPP: ".cpp",
-    LANG_PASCAL: ".pas",
-    LANG_PYTHON: ".py",
-    LANG_PHP: ".php",
-    LANG_JAVA: ".java",
-    LANG_TURING: ".t",
-}
-LANGUAGE_TO_HEADER_EXT_MAP = {
-    LANG_C: ".h",
-    LANG_CPP: ".h",
-    LANG_PASCAL: "lib.pas",
-}
-LANGUAGE_TO_OBJ_EXT_MAP = {
-    LANG_C: ".o",
-    LANG_CPP: ".o",
-    LANG_PASCAL: ".o",
-}
 
 # Task score modes.
 
@@ -121,10 +61,6 @@ LANGUAGE_TO_OBJ_EXT_MAP = {
 SCORE_MODE_MAX = "max"
 # Maximum score among all tokened submissions and the last submission.
 SCORE_MODE_MAX_TOKENED_LAST = "max_tokened_last"
-# ECOO scoring style (last score with time bonus and "perfect" bonus)
-SCORE_MODE_ECOO = "ecoo"
-# Maximum score among all tokened submissions with ECOO-like scoring style
-SCORE_MODE_MAX_JDCC = "max_jdcc"
 
 from .util import ConfigError, mkdir, utf8_decoder, Address, ServiceCoord, \
     get_safe_shard, get_service_address, get_service_shards, \

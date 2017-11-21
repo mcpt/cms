@@ -3,8 +3,8 @@ Installation
 
 .. _installation_dependencies:
 
-Dependencies
-============
+Dependencies and available compilers
+====================================
 
 These are our requirements (in particular we highlight those that are not usually installed by default) - previous versions may or may not work:
 
@@ -20,59 +20,15 @@ These are our requirements (in particular we highlight those that are not usuall
 
 * `Python <http://www.python.org/>`_ >= 2.7, < 3.0;
 
-* `setuptools <http://pypi.python.org/pypi/setuptools>`_ >= 0.6;
-
-* `Tornado <http://www.tornadoweb.org/>`_ >= 2.0;
-
-* `Psycopg <http://initd.org/psycopg/>`_ >= 2.4;
-
-* `gevent <http://www.gevent.org/>`_ >= 1.0;
-
-* `SQLAlchemy <http://www.sqlalchemy.org/>`_ >= 0.7;
-
 * `libcg <http://libcg.sourceforge.net/>`_;
-
-* `psutil <https://code.google.com/p/psutil/>`_ >= 0.6;
-
-  .. We need 0.6 because of the new memory API (https://code.google.com/p/psutil/wiki/Documentation#Memory).
-
-* `netifaces <http://alastairs-place.net/projects/netifaces/>`_ >= 0.5;
-
-* `PyCrypto <https://www.dlitz.net/software/pycrypto/>`_ >= 2.3;
-
-* `pytz <http://pytz.sourceforge.net/>`_;
-
-* `six <http://pythonhosted.org/six/>`_ >= 1.1;
-
-* `requests <http://docs.python-requests.org/en/latest/>`_ >= 1.1;
-
-* `werkzeug <http://werkzeug.pocoo.org/>`_ >= 0.8;
-
-* `patool <http://wummel.github.io/patool>`_ >= 1.7;
 
 * `iso-codes <http://pkg-isocodes.alioth.debian.org/>`_;
 
 * `shared-mime-info <http://freedesktop.org/wiki/Software/shared-mime-info>`_;
 
-* `PyYAML <http://pyyaml.org/wiki/PyYAML>`_ >= 3.10 (only for some importers);
-
-* `BeautifulSoup <http://www.crummy.com/software/BeautifulSoup/>`_ >= 3.2 (only for running tests);
-
-* `mechanize <http://wwwsearch.sourceforge.net/mechanize/>`_ >= 0.2 (only for running tests);
-
-* `coverage <http://nedbatchelder.com/code/coverage/>`_ >= 3.4 (only for running tests);
-
-* `mock <http://www.voidspace.org.uk/python/mock>`_ >= 1.0 (only for running tests);
-
-* `Sphinx <http://sphinx-doc.org/>`_ (only for building documentation).
-
 * `TeX Live <https://www.tug.org/texlive/>`_ (only for printing)
 
-* `pycups <http://pypi.python.org/pypi/pycups>`_ (only for printing)
-
 * `a2ps <https://www.gnu.org/software/a2ps/>`_ (only for printing)
-
-* `PyPDF2 <https://pypi.python.org/pypi/PyPDF2>`_ (only for printing)
 
 You will also require a Linux kernel with support for control groups and namespaces. Support has been in the Linux kernel since 2.6.32. Other distributions, or systems with custom kernels, may not have support enabled. At a minimum, you will need to enable the following Linux kernel options: ``CONFIG_CGROUPS``, ``CONFIG_CGROUP_CPUACCT``, ``CONFIG_MEMCG`` (previously called as ``CONFIG_CGROUP_MEM_RES_CTLR``), ``CONFIG_CPUSETS``, ``CONFIG_PID_NS``, ``CONFIG_IPC_NS``, ``CONFIG_NET_NS``. It is anyway suggested to use Linux kernel version at least 3.8.
 
@@ -80,125 +36,82 @@ Then you require the compilation and execution environments for the languages yo
 
 * `GNU compiler collection <https://gcc.gnu.org/>`_ (for C, C++ and Java, respectively with executables ``gcc``, ``g++`` and ``gcj``);
 
+* alternatively, for Java, your choice of a JDK, for example OpenJDK (but any other JDK behaving similarly is fine, for example Oracle's);
+
 * `Free Pascal <http://www.freepascal.org/>`_ (for Pascal, with executable ``fpc``);
 
 * `Python <http://www.python.org/>`_ >= 2.7, < 3.0 (for Python, with executable ``python2``; note though that this must be installed anyway because it is required by CMS itself);
 
-* `PHP <http://www.php.net>`_ >= 5 (for PHP, with executable ``php5``).
+* `PHP <http://www.php.net>`_ >= 5 (for PHP, with executable ``php``);
+
+* `Glasgow Haskell Compiler <https://www.haskell.org/ghc/>`_ (for Haskell, with executable ``ghc``).
 
 All dependencies can be installed automatically on most Linux distributions.
 
 Ubuntu
 ------
 
-On Ubuntu 14.04, one will need to run the following script to satisfy all dependencies:
+On Ubuntu 16.04, one will need to run the following script to satisfy all dependencies:
 
 .. sourcecode:: bash
 
-    sudo apt-get install build-essential fpc postgresql postgresql-client \
-         gettext python2.7 python-setuptools python-tornado python-psycopg2 \
-         python-sqlalchemy python-psutil python-netifaces python-crypto \
-         python-tz python-six iso-codes shared-mime-info stl-manual \
-         python-beautifulsoup python-mechanize python-coverage python-mock \
-         cgroup-lite python-requests python-werkzeug python-gevent patool
+    # Feel free to change OpenJDK packages with your preferred JDK.
+    sudo apt-get install build-essential openjdk-8-jre openjdk-8-jdk fpc \
+        postgresql postgresql-client gettext python2.7 \
+        iso-codes shared-mime-info stl-manual cgroup-lite
 
-    # Optional.
-    # sudo apt-get install nginx-full php5-cli php5-fpm phppgadmin \
-    #      python-yaml python-sphinx texlive-latex-base python-cups a2ps
-    # You can install PyPDF2 using Python Package Index.
+    # Only if you are going to use pip/virtualenv to install python dependencies
+    sudo apt-get install python-dev libpq-dev libcups2-dev libyaml-dev \
+         libffi-dev python-pip
+
+    # Optional
+    sudo apt-get install nginx-full php7.0-cli php5-fpm phppgadmin \
+         texlive-latex-base a2ps gcj-jdk haskell-platform
 
 Arch Linux
 ----------
 
-On Arch Linux, unofficial AUR packages can be found: `cms <http://aur.archlinux.org/packages/cms>`_ or `cms-git <http://aur.archlinux.org/packages/cms-git>`_. However, if you don't want to use them, the following command will install almost all dependencies (some of them can be found in the AUR):
+On Arch Linux, unofficial AUR packages can be found: `cms <http://aur.archlinux.org/packages/cms>`_ or `cms-git <http://aur.archlinux.org/packages/cms-git>`_. However, if you do not want to use them, the following command will install almost all dependencies (some of them can be found in the AUR):
 
 .. sourcecode:: bash
 
-    sudo pacman -S base-devel fpc postgresql postgresql-client python2 \
-         setuptools python2-tornado python2-psycopg2 python2-sqlalchemy \
-         python2-psutil python2-netifaces python2-crypto python2-pytz \
-         python2-six iso-codes shared-mime-info python2-beautifulsoup3 \
-         python2-mechanize python2-mock python2-requests python2-werkzeug \
-         python2-gevent python2-coverage
+    sudo pacman -S base-devel jre8-openjdk jdk8-openjdk fpc \
+         postgresql postgresql-client python2 \
+         iso-codes shared-mime-info
 
     # Install the following from AUR.
     # https://aur.archlinux.org/packages/libcgroup/
-    # https://aur.archlinux.org/packages/patool/
     # https://aur.archlinux.org/packages/sgi-stl-doc/
 
-    # Optional.
-    # sudo pacman -S nginx php php-fpm phppgadmin python2-yaml python-sphinx \
-    #      texlive-core python2-pycups a2ps
-    # Optionally install the following from AUR.
-    # https://aur.archlinux.org/packages/python2-pypdf2/
+    # Only if you are going to use pip/virtualenv to install python dependencies
+    sudo pacman -S --needed postgresql-libs libcups libyaml python2-pip
 
-Debian
-------
+    # Optional
+    sudo pacman -S --needed nginx php php-fpm phppgadmin texlive-core a2ps \
+         ghc
 
-While Debian uses (almost) the same packages as Ubuntu, setting up cgroups is more involved.
-Debian requires the memory module of cgroups to be activated via a kernel command line parameter. Add ``cgroup_enable=memory`` to ``GRUB_CMDLINE_LINUX_DEFAULT`` in ``/etc/default/grub`` and then run ``update-grub``.
+Preparation steps
+=================
 
-Also, we need to mount the cgroup filesystems (under Ubuntu, the cgroup-lite package does this). To do this automatically, add the following file into /etc/init.d:
+Download :gh_download:`CMS` |release| from GitHub as an archive, then extract it on your filesystem. You should then access the ``cms`` folder using a terminal.
 
-.. sourcecode:: bash
+.. warning::
 
-    #! /bin/sh
-    # /etc/init.d/cgroup
+    If you decided to ``git clone`` the repository instead of downloading the archive, and you didn't use the ``--recursive`` option when cloning, then **you need** to issue the following command to fetch the source code of the sandbox:
 
-    # The following part carries out specific functions depending on arguments.
-    case "$1" in
-      start)
-        mount -t tmpfs none /sys/fs/cgroup/
-        mkdir /sys/fs/cgroup/memory
-        mount -t cgroup none /sys/fs/cgroup/memory -o memory
-        mkdir /sys/fs/cgroup/cpuacct
-        mount -t cgroup none /sys/fs/cgroup/cpuacct -o cpuacct
-        mkdir /sys/fs/cgroup/cpuset
-        mount -t cgroup none /sys/fs/cgroup/cpuset -o cpuset
-        ;;
-      stop)
-        umount /sys/fs/cgroup/cpuset
-        umount /sys/fs/cgroup/cpuacct
-        umount /sys/fs/cgroup/memory
-        umount /sys/fs/cgroup
-        ;;
-      *)
-        echo "Usage: /etc/init.d/foobar {start|stop}"
-        exit 1
-        ;;
-    esac
+    .. sourcecode:: bash
 
-    exit 0
+        git submodule update --init
 
-Then execute ``chmod 755 /etc/init.d/cgroup`` as root and finally ``update-rc.d cgroup defaults`` to add the script to the default scripts.
-The following command should now mount the cgroup filesystem:
+In order to run CMS there are some preparation steps to run (like installing the sandbox, compiling localization files, creating the ``cmsuser``, and so on). You can either do all these steps by hand or you can run the following command:
 
 .. sourcecode:: bash
 
-    /etc/init.d/cgroup start
+    sudo ./prerequisites.py install
 
+.. FIXME -- The following part probably does not need to be mentioned. Moreover, it would be better if isolate was just a dependency (like postgresql) to be installed separately, with its own group (e.g. 'isolate' instead of 'cmsuser'). The 'cmsuser' group could just become deprected, at that point.
 
-Python dependencies via pip
----------------------------
-
-If you prefer using Python Package Index, you can retrieve all Python dependencies with this line:
-
-.. sourcecode:: bash
-
-    sudo pip install -r REQUIREMENTS.txt
-
-
-Installing CMS
-==============
-
-You can download CMS |release| from :gh_download:`GitHub` and extract it on your filesystem. After that, you can install it (recommended, not necessary though):
-
-.. sourcecode:: bash
-
-    ./setup.py build
-    sudo ./setup.py install
-
-If you install CMS, you also need to add your user to the ``cmsuser`` group and logout to make the change effective:
+This script will add you to the ``cmsuser`` group if you answer ``Y`` when asked. If you want to handle your groups by yourself, answer ``N`` and then run:
 
 .. sourcecode:: bash
 
@@ -210,18 +123,176 @@ You can verify to be in the group by issuing the command:
 
     groups
 
+Remember to logout, to make the change effective.
+
 .. warning::
 
    Users in the group ``cmsuser`` will be able to launch the ``isolate`` program with root permission. They may exploit this to gain root privileges. It is then imperative that no untrusted user is allowed in the group ``cmsuser``.
 
 .. _installation_updatingcms:
 
+
+Installing CMS and its Python dependencies
+==========================================
+
+There are a number of ways to install CMS and its Python dependencies:
+
+Method 1: Global installation with pip
+--------------------------------------
+
+There are good reasons to install CMS and its Python dependencies via pip (Python Package Index) instead of your package manager (e.g. apt-get). For example: two different Linux distro (or two different versions of the same distro) may offer two different versions of ``python-sqlalchemy``. When using pip, you can choose to install a *specific version* of ``sqlalchemy`` that is known to work correctly with CMS.
+
+Assuming you have ``pip`` installed, you can do this:
+
+.. sourcecode:: bash
+
+    sudo pip2 install -r requirements.txt
+    sudo pip2 setup.py install
+
+This command installs python dependencies globally. Note that on some distros, like Arch Linux, this might interfere with the system package manager. If you want to perform the installation in your home folder instead, then you can do this instead:
+
+.. sourcecode:: bash
+
+    pip2 install --user -r requirements.txt
+    pip2 setup.py install --user
+
+Method 2: Virtual environment
+-----------------------------
+
+.. warning::
+
+An alternative method to perform the installation is with a `virtual environment <https://virtualenv.pypa.io/en/latest/>`_, which is an isolated Python environment that you can put wherever you like and that can be activated/deactivated at will. The tool you need in order to create a virtual environment is called ``virtualenv``, and can be installed by looking for ``virtualenv`` using your Linux distribution's package manager. For example:
+
+* Ubuntu 14.x: `python-virtualenv <http://packages.ubuntu.com/trusty/python-virtualenv>`_.
+* Ubuntu 16.x: `virtualenv <http://packages.ubuntu.com/xenial/virtualenv>`_.
+* Arch Linux: `python-virtualenv <https://www.archlinux.org/packages/extra/any/python-virtualenv/>`_.
+
+.. FUTURE FIXME: virtualenv installation is necessary only on python2; when the
+   porting to python3 will be complete, the "new" way of creating a virtual
+   environment will be ``pyvenv`` or equivalently ``python -m venv`` (the venv
+   module and the pyvenv script come bundled with python3, so there is no need
+   to install virtualenv anymore).
+
+Once you installed ``virtualenv``, you will need to create a virtual environment somewhere in your filesystem. For example, let's assume that you decided to create it under your home directory (as ``~/cms_venv``):
+
+.. sourcecode:: bash
+
+    virtualenv -p python2 ~/cms_venv
+
+To activate it:
+
+.. sourcecode:: bash
+
+    source ~/cms_venv/bin/activate
+
+After the activation, the ``pip`` command will *always* be available (even if it was not available globally, e.g. because you did not install it). In general, every python command (python, pip) will refer to their corresponding virtual version. So, you can install python dependencies by issuing:
+
+.. sourcecode:: bash
+
+    pip install -r requirements.txt
+    python setup.py install
+
+.. note::
+
+    Once you finished using CMS, you can deactivate the virtual environment by issuing:
+
+    .. sourcecode:: bash
+
+        deactivate
+
+Method 3: Using ``apt-get`` on Ubuntu
+-------------------------------------
+
+.. warning::
+
+  It is usually possible to install python dependencies using your Linux distribution's package manager. However, keep in mind that the version of each package is controlled by the package mantainers and could be too new or too old for CMS. **On Ubuntu, this is generally not the case** since we try to build on the python packages that are available for the current LTS version.
+
+To install CMS and its Python dependencies on Ubuntu, you can issue:
+
+.. sourcecode:: bash
+
+    sudo python setup.py install
+
+    sudo apt-get install python-setuptools python-tornado python-psycopg2 \
+         python-sqlalchemy python-psutil python-netifaces python-crypto \
+         python-tz python-six python-beautifulsoup python-mechanize \
+         python-coverage python-mock python-requests python-werkzeug \
+         python-gevent python-bcrypt python-chardet patool
+
+    # Optional.
+    # sudo apt-get install python-yaml python-sphinx python-cups python-pypdf2
+
+Method 4: Using ``pacman`` on Arch Linux
+----------------------------------------
+
+.. warning::
+
+  It is usually possible to install python dependencies using your Linux distribution's package manager. However, keep in mind that the version of each package is controlled by the package mantainers and could be too new or too old for CMS. **This is especially true for Arch Linux**, which is a bleeding edge distribution.
+
+To install CMS python dependencies on Arch Linux (again: assuming you did not use the aforementioned AUR packages), you can issue:
+
+.. sourcecode:: bash
+
+    sudo python2 setup.py install
+
+    sudo pacman -S --needed python2-setuptools python2-tornado python2-psycopg2 \
+         python2-sqlalchemy python2-psutil python2-netifaces python2-crypto \
+         python2-pytz python2-six python2-beautifulsoup3 python2-mechanize \
+         python2-coverage python2-mock python2-requests python2-werkzeug \
+         python2-gevent python2-bcrypt python2-chardet
+
+    # Install the following from AUR.
+    # https://aur.archlinux.org/packages/patool/
+
+    # Optional.
+    # sudo pacman -S --needed python2-yaml python-sphinx python2-pycups
+    # Optionally install the following from AUR.
+    # https://aur.archlinux.org/packages/python2-pypdf2/
+
+
+.. _installation_running-cms-non-installed:
+
+Running CMS non-installed
+=========================
+
+To run CMS without installing it in the system, you need first to build the prerequisites:
+
+.. sourcecode:: bash
+
+    ./prerequisites.py build
+
+There are still a few steps to complete manually in this case. First, add CMS and isolate to the path and create the configuration files:
+
+.. sourcecode:: bash
+
+    export PATH=$PATH:./isolate/
+    export PYTHONPATH=./
+    cp config/cms.conf.sample config/cms.conf
+    cp config/cms.ranking.conf.sample config/cms.ranking.conf
+
+Second, perform these tasks (that require root permissions):
+
+* create the ``cmsuser`` user and a group with the same name;
+
+* add your user to the ``cmsuser`` group;
+
+* set isolate to be owned by root:cmsuser, and set its suid bit.
+
+For example:
+
+.. sourcecode:: bash
+
+    sudo useradd cmsuser
+    sudo usermod -a -G cmsuser <your user>
+    sudo chown root:cmsuser ./isolate/isolate
+    sudo chmod u+s ./isolate/isolate
+
 Updating CMS
 ============
 
 As CMS develops, the database schema it uses to represent its data may be updated and new versions may introduce changes that are incompatible with older versions.
 
-To preserve the data stored on the database you need to dump it on the filesystem using ``cmsContestExporter`` **before you update CMS** (i.e. with the old version).
+To preserve the data stored on the database you need to dump it on the filesystem using ``cmsDumpExporter`` **before you update CMS** (i.e. with the old version).
 
 You can then update CMS and reset the database schema by running:
 
@@ -230,5 +301,4 @@ You can then update CMS and reset the database schema by running:
     cmsDropDB
     cmsInitDB
 
-To load the previous data back into the database you can use ``cmsContestImporter``: it will adapt the data model automatically on-the-fly (you can use ``cmsDumpUpdater`` to store the updated version back on disk and speed up future imports).
-
+To load the previous data back into the database you can use ``cmsDumpImporter``: it will adapt the data model automatically on-the-fly (you can use ``cmsDumpUpdater`` to store the updated version back on disk and speed up future imports).

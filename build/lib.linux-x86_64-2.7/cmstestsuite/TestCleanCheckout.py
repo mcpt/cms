@@ -26,6 +26,7 @@ import atexit
 import tempfile
 import subprocess
 import shutil
+import sys
 import os
 from argparse import ArgumentParser
 
@@ -77,7 +78,7 @@ def setup_cms():
     os.environ["PYTHONPATH"] = "%(TEST_DIR)s" % CONFIG
 
     info("Building cms.")
-    sh("./setup.py build")
+    sh("./prerequisites.py build")
     # Add permission bits to isolate.
     sh("sudo chown root:root isolate/isolate")
     sh("sudo chmod 4755 isolate/isolate")
@@ -88,7 +89,7 @@ def setup_cms():
     sh(["ln", "-s", "%(GIT_ORIGIN)s/log" % CONFIG, "log"])
 
     info("Creating tables.")
-    sh("python scripts/cmsInitDB")
+    sh(sys.executable + " scripts/cmsInitDB")
 
 
 if __name__ == "__main__":

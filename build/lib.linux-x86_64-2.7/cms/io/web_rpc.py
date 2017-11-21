@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
-# Copyright © 2013 Luca Wehrstedt <luca.wehrstedt@gmail.com>
+# Copyright © 2013-2016 Luca Wehrstedt <luca.wehrstedt@gmail.com>
+# Copyright © 2015 Stefano Maggiolo <s.maggiolo@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -26,8 +27,8 @@ import logging
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
-from werkzeug.exceptions import HTTPException, BadRequest, NotFound, \
-    NotAcceptable, UnsupportedMediaType, ServiceUnavailable
+from werkzeug.exceptions import HTTPException, BadRequest, Forbidden, \
+    NotFound, NotAcceptable, UnsupportedMediaType, ServiceUnavailable
 from werkzeug.wsgi import responder
 
 from cms import ServiceCoord
@@ -68,14 +69,18 @@ class RPCMiddleware(object):
     string describing the error that occured (if any).
 
     """
-    def __init__(self, service):
+    def __init__(self, service, auth=None):
         """Create an HTTP-to-RPC proxy for the given service.
 
         service (Service): the service this application is running for.
             Will usually be the AdminWebServer.
+        auth (function|None): a function taking the environ of a request
+            and returning whether the request is allowed. If not present,
+            all requests are allowed.
 
         """
         self._service = service
+        self._auth = auth
         self._url_map = Map([Rule("/<service>/<int:shard>/<method>",
                                   methods=["POST"], endpoint="rpc")],
                             encoding_errors="strict")
@@ -105,15 +110,17 @@ class RPCMiddleware(object):
 
         assert endpoint == "rpc"
 
-        request = Request(environ)
-        request.encoding_errors = "strict"
-
-        response = Response()
-
         remote_service = ServiceCoord(args['service'], args['shard'])
 
         if remote_service not in self._service.remote_services:
             return NotFound()
+
+        if self._auth is not None and not self._auth(
+                args['service'], args['shard'], args['method']):
+            return Forbidden()
+
+        request = Request(environ)
+        request.encoding_errors = "strict"
 
         # TODO Check content_encoding and content_md5.
 
@@ -134,8 +141,9 @@ class RPCMiddleware(object):
         result = self._service.remote_services[remote_service].execute_rpc(
             args['method'], data)
 
-        # XXX We could set a timeout on the .wait().
-        result.wait()
+        result.wait(timeout=60)
+
+        response = Response()
 
         response.status_code = 200
         response.mimetype = "application/json"

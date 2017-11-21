@@ -1,6 +1,0 @@
-sudo CMS_CONFIG="/home/wlmacadmin/Downloads/cms-v1.2.0/config/second-contest/cms.conf" cmsScoringService -c 1 & \
-sudo CMS_CONFIG="/home/wlmacadmin/Downloads/cms-v1.2.0/config/second-contest/cms.conf" cmsChecker & \
-sudo CMS_CONFIG="/home/wlmacadmin/Downloads/cms-v1.2.0/config/second-contest/cms.conf" cmsEvaluationService -c 1 & \
-sudo CMS_CONFIG="/home/wlmacadmin/Downloads/cms-v1.2.0/config/second-contest/cms.conf" cmsContestWebServer -c 1 & \
-sudo CMS_CONFIG="/home/wlmacadmin/Downloads/cms-v1.2.0/config/second-contest/cms.conf" cmsWorker 0 & \
-sudo CMS_CONFIG="/home/wlmacadmin/Downloads/cms-v1.2.0/config/second-contest/cms.conf" cmsProxyService -c 1 &

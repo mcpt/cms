@@ -3,10 +3,13 @@
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
-# Copyright © 2010-2015 Stefano Maggiolo <s.maggiolo@gmail.com>
+# Copyright © 2010-2017 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
 # Copyright © 2013 Bernard Blackham <bernard@largestprime.net>
 # Copyright © 2013 Luca Wehrstedt <luca.wehrstedt@gmail.com>
+# Copyright © 2016 Myungwoo Chun <mc.tamaki@gmail.com>
+# Copyright © 2016 Masaki Hara <ackie.h.gmai@gmail.com>
+# Copyright © 2016 Amir Keivan Mohtashami <akmohtashami97@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -53,7 +56,9 @@ __all__ = [
     # contest
     "Contest", "Announcement",
     # user
-    "User", "Message", "Question",
+    "User", "Team", "Participation", "Message", "Question",
+    # admin
+    "Admin",
     # task
     "Task", "Statement", "Attachment", "SubmissionFormatElement", "Dataset",
     "Manager", "Testcase",
@@ -79,11 +84,10 @@ __all__ = [
 
 # Instantiate or import these objects.
 
-version = 14
-
+version = 25
 
 engine = create_engine(config.database, echo=config.database_debug,
-                       pool_size=20, max_overflow=20, pool_recycle=120)
+                       pool_timeout=60, pool_recycle=120)
 
 
 from .session import Session, ScopedSession, SessionGen, \
@@ -92,7 +96,8 @@ from .session import Session, ScopedSession, SessionGen, \
 from .types import RepeatedUnicode
 from .base import metadata, Base
 from .contest import Contest, Announcement
-from .user import User, Message, Question
+from .user import User, Team, Participation, Message, Question
+from .admin import Admin
 from .task import Task, Statement, Attachment, SubmissionFormatElement, \
     Dataset, Manager, Testcase
 from .submission import Submission, File, Token, SubmissionResult, \
@@ -201,16 +206,16 @@ def get_submission_results_for_dataset(self, dataset):
 Dataset.get_submission_results = get_submission_results_for_dataset
 
 
-# The following is a method of User that cannot be put in the right
+# The following is a method of Participation that cannot be put in the right
 # file because of circular dependencies.
 
 def get_tokens(self):
-    """Returns a list of tokens used by a user.
+    """Returns a list of tokens used by a user participation.
 
     returns (list): list of tokens.
 
     """
     return self.sa_session.query(Token)\
-               .join(Submission).filter(Submission.user == self).all()
+               .join(Submission).filter(Submission.participation == self).all()
 
-User.get_tokens = get_tokens
+Participation.get_tokens = get_tokens

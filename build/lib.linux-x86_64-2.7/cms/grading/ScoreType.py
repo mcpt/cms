@@ -5,7 +5,8 @@
 # Copyright © 2010-2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
 # Copyright © 2010-2013 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
-# Copyright © 2013 Luca Wehrstedt <luca.wehrstedt@gmail.com>
+# Copyright © 2013-2016 Luca Wehrstedt <luca.wehrstedt@gmail.com>
+# Copyright © 2015 wafrelka <wafrelka@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -36,6 +37,7 @@ from __future__ import unicode_literals
 
 import json
 import logging
+import re
 
 from tornado.template import Template
 
@@ -71,6 +73,31 @@ class ScoreType(object):
         self.max_score, self.max_public_score, self.ranking_headers = \
             self.max_scores()
 
+    @staticmethod
+    def format_score(score, max_score, unused_score_details,
+                     score_precision, unused_translator=None):
+        """Produce the string of the score that is shown in CWS.
+
+        In the submission table in the task page of CWS the global
+        score of the submission is shown (the sum of all subtask and
+        testcases). This method is in charge of producing the actual
+        text that is shown there. It can be overridden to provide a
+        custom message (e.g. "Accepted"/"Rejected").
+
+        score (float): the global score of the submission.
+        max_score (float): the maximum score that can be achieved.
+        unused_score_details (string): the opaque data structure that
+            the ScoreType produced for the submission when scoring it.
+        score_precision (int): the maximum number of digits of the
+            fractional digits to show.
+        unused_translator (function): a function to localize text.
+
+        return (string): the message to show.
+
+        """
+        return "%g / %g" % (round(score, score_precision),
+                            round(max_score, score_precision))
+
     def get_html_details(self, score_details, translator=None):
         """Return an HTML string representing the score details of a
         submission.
@@ -99,10 +126,12 @@ class ScoreType(object):
     def max_scores(self):
         """Returns the maximum score that one could aim to in this
         problem. Also return the maximum score from the point of view
-        of a user that did not play the token. Depend on the subclass.
+        of a user that did not play the token. And the headers of the
+        columns showing extra information (e.g. subtasks) in RWS.
+        Depend on the subclass.
 
-        return (float, float): maximum score and maximum score with
-                               only public testcases.
+        return (float, float, [string]): maximum score and maximum
+            score with only public testcases; ranking headers.
 
         """
         logger.error("Unimplemented method max_scores.")
@@ -115,10 +144,11 @@ class ScoreType(object):
             result of which we want the score
 
         returns (float, str, float, str, [str]): respectively: the
-            score, the HTML string with additional information (e.g.
-            testcases' and subtasks' score), and the same information
-            from the point of view of a user that did not play a
-            token, the list of strings to send to RWS.
+            score, the opaque data with additional information (e.g.
+            testcases' and subtasks' score) that will be converted to
+            HTML by get_html_details, and the same information from the
+            point of view of a user that did not play a token, the list
+            of strings to send to RWS.
 
         """
         logger.error("Unimplemented method compute_score.")
@@ -139,9 +169,13 @@ class ScoreTypeGroup(ScoreTypeAlone):
     """Intermediate class to manage tasks whose testcases are
     subdivided in groups (or subtasks). The score type parameters must
     be in the form [[m, t, ...], [...], ...], where m is the maximum
-    score for the given subtask and t is the number of testcases
+    score for the given subtask and t is the parameter for specifying
+    testcases.
+
+    If t is int, it is interpreted as the number of testcases
     comprising the subtask (that are consumed from the first to the
-    last, sorted by num).
+    last, sorted by num). If t is unicode, it is interpreted as the regular
+    expression of the names of target testcases. All t must have the same type.
 
     A subclass must implement the method 'get_public_outcome' and
     'reduce'.
@@ -157,6 +191,7 @@ class ScoreTypeGroup(ScoreTypeAlone):
     TEMPLATE = """\
 {% from cms.grading import format_status_text %}
 {% from cms.server import format_size %}
+{% set idx = 0 %}
 {% for st in details %}
     {% if "score" in st and "max_score" in st %}
         {% if st["score"] >= st["max_score"] %}
@@ -175,11 +210,11 @@ class ScoreTypeGroup(ScoreTypeAlone):
         </span>
     {% if "score" in st and "max_score" in st %}
         <span class="score">
-            {{ '%g' % round(st["score"], 2) }} / {{ st["max_score"] }}
+            ({{ '%g' % round(st["score"], 2) }} / {{ st["max_score"] }})
         </span>
     {% else %}
         <span class="score">
-            {{ _("N/A") }}
+            ({{ _("N/A") }})
         </span>
     {% end %}
     </div>
@@ -187,14 +222,16 @@ class ScoreTypeGroup(ScoreTypeAlone):
         <table class="testcase-list">
             <thead>
                 <tr>
-                    <th>{{ _("Outcome") }}</th>
-                    <th>{{ _("Details") }}</th>
-                    <th>{{ _("Execution time") }}</th>
-                    <th>{{ _("Memory used") }}</th>
+                    <th class="idx">{{ _("#") }}</th>
+                    <th class="outcome">{{ _("Outcome") }}</th>
+                    <th class="details">{{ _("Details") }}</th>
+                    <th class="execution-time">{{ _("Execution time") }}</th>
+                    <th class="memory-used">{{ _("Memory used") }}</th>
                 </tr>
             </thead>
             <tbody>
     {% for tc in st["testcases"] %}
+        {% set idx = idx + 1 %}
         {% if "outcome" in tc and "text" in tc %}
             {% if tc["outcome"] == "Correct" %}
                 <tr class="correct">
@@ -203,25 +240,29 @@ class ScoreTypeGroup(ScoreTypeAlone):
             {% else %}
                 <tr class="partiallycorrect">
             {% end %}
-                    <td>{{ _(tc["outcome"]) }}</td>
-                    <td>{{ format_status_text(tc["text"], _) }}</td>
-                    <td>
+                    <td class="idx">{{ idx }}</td>
+                    <td class="outcome">{{ _(tc["outcome"]) }}</td>
+                    <td class="details">
+                      {{ format_status_text(tc["text"], _) }}
+                    </td>
+                    <td class="execution-time">
             {% if "time" in tc and tc["time"] is not None %}
                         {{ _("%(seconds)0.3f s") % {'seconds': tc["time"]} }}
             {% else %}
                         {{ _("N/A") }}
             {% end %}
                     </td>
-                    <td>
+                    <td class="memory-used">
             {% if "memory" in tc and tc["memory"] is not None %}
                         {{ format_size(tc["memory"]) }}
             {% else %}
                         {{ _("N/A") }}
             {% end %}
                     </td>
+                </tr>
         {% else %}
                 <tr class="undefined">
-                    <td colspan="4">
+                    <td colspan="5">
                         {{ _("N/A") }}
                     </td>
                 </tr>
@@ -233,24 +274,67 @@ class ScoreTypeGroup(ScoreTypeAlone):
 </div>
 {% end %}"""
 
+    def retrieve_target_testcases(self):
+        """Return the list of the target testcases for each subtask.
+
+        Each element of the list consist of multiple strings.
+        Each string represents the testcase name which should be included
+        to the corresponding subtask.
+        The order of the list is the same as 'parameters'.
+
+        return ([[unicode]]): the list of the target testcases for each task.
+
+        """
+
+        t_params = [p[1] for p in self.parameters]
+
+        if all(isinstance(t, int) for t in t_params):
+
+            # XXX Lexicographical order by codename
+            indices = sorted(self.public_testcases.keys())
+            current = 0
+            targets = []
+
+            for t in t_params:
+                next_ = current + t
+                targets.append(indices[current:next_])
+                current = next_
+
+            return targets
+
+        elif all(isinstance(t, unicode) for t in t_params):
+
+            indices = sorted(self.public_testcases.keys())
+            targets = []
+
+            for t in t_params:
+                regexp = re.compile(t)
+                target = [tc for tc in indices if regexp.match(tc)]
+                if not target:
+                    raise StandardError(
+                        "No testcase matches against the regexp '%s'" % t)
+                targets.append(target)
+
+            return targets
+
+        raise StandardError(
+            "In the score type parameters, the second value of each element "
+            "must have the same type (int or unicode)")
+
     def max_scores(self):
         """See ScoreType.max_score."""
         score = 0.0
         public_score = 0.0
         headers = list()
 
-        # XXX Lexicographical order by codename
-        indices = sorted(self.public_testcases.keys())
-        current = 0
+        targets = self.retrieve_target_testcases()
 
         for i, parameter in enumerate(self.parameters):
-            next_ = current + parameter[1]
+            target = targets[i]
             score += parameter[0]
-            if all(self.public_testcases[idx]
-                   for idx in indices[current:next_]):
+            if all(self.public_testcases[idx] for idx in target):
                 public_score += parameter[0]
             headers += ["Subtask %d (%g)" % (i + 1, parameter[0])]
-            current = next_
 
         return score, public_score, headers
 
@@ -258,35 +342,30 @@ class ScoreTypeGroup(ScoreTypeAlone):
         """See ScoreType.compute_score."""
         # Actually, this means it didn't even compile!
         if not submission_result.evaluated():
-            return 0.0, "[]", 0.0, "[]", \
-                json.dumps(["%lg" % 0.0 for _ in self.parameters])
+            return 0.0, "[]", 0.0, "[]", ["%lg" % 0.0 for _ in self.parameters]
 
-        # XXX Lexicographical order by codename
-        indices = sorted(self.public_testcases.keys())
+        targets = self.retrieve_target_testcases()
         evaluations = dict((ev.codename, ev)
                            for ev in submission_result.evaluations)
         subtasks = []
         public_subtasks = []
         ranking_details = []
-        tc_start = 0
-        tc_end = 0
 
         for st_idx, parameter in enumerate(self.parameters):
-            tc_end = tc_start + parameter[1]
+            target = targets[st_idx]
             st_score = self.reduce([float(evaluations[idx].outcome)
-                                    for idx in indices[tc_start:tc_end]],
+                                    for idx in target],
                                    parameter) * parameter[0]
-            st_public = all(self.public_testcases[idx]
-                            for idx in indices[tc_start:tc_end])
+            st_public = all(self.public_testcases[idx] for idx in target)
             tc_outcomes = dict((
                 idx,
                 self.get_public_outcome(
                     float(evaluations[idx].outcome), parameter)
-                ) for idx in indices[tc_start:tc_end])
+                ) for idx in target)
 
             testcases = []
             public_testcases = []
-            for idx in indices[tc_start:tc_end]:
+            for idx in target:
                 testcases.append({
                     "idx": idx,
                     "outcome": tc_outcomes[idx],
@@ -314,8 +393,6 @@ class ScoreTypeGroup(ScoreTypeAlone):
 
             ranking_details.append("%g" % round(st_score, 2))
 
-            tc_start = tc_end
-
         score = sum(st["score"] for st in subtasks)
         public_score = sum(st["score"]
                            for st in public_subtasks
@@ -323,7 +400,7 @@ class ScoreTypeGroup(ScoreTypeAlone):
 
         return score, json.dumps(subtasks), \
             public_score, json.dumps(public_subtasks), \
-            json.dumps(ranking_details)
+            ranking_details
 
     def get_public_outcome(self, unused_outcome, unused_parameter):
         """Return a public outcome from an outcome.

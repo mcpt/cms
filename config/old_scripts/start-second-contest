@@ -1,0 +1,7 @@
+export CMS_CONFIG="~/cms/config/cms.conf"
+sudo cmsScoringService -c $1 & \
+sudo cmsChecker & \
+sudo cmsEvaluationService -c $1 & \
+sudo cmsContestWebServer -c $1 & \
+sudo cmsWorker 0 & \
+sudo cmsProxyService -c $1 & 

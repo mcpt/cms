@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#!!! All comments that start with !!! are features added in by MCPT
+
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
@@ -28,9 +30,10 @@ from cmsranking.Submission import store as submission_store
 from cmsranking.Subchange import store as subchange_store
 from cmsranking.Task import store as task_store
 
+CONTEST_END = 1509573600
+#!!!Contest End (GMT, epoch time in seconds)
 
 logger = logging.getLogger(__name__)
-
 
 class NumberSet(object):
     """A fast data structure on numbers.
@@ -97,6 +100,7 @@ class Score(object):
         self._score_mode = score_mode
 
     def append_change(self, change):
+        #logger.info("CHANGE AT "+ str(change.time))
         # Remove from released submission (if needed), apply changes,
         # add back to released submissions (if needed) and check if
         # it's the last. Compute the new score and, if it changed,
@@ -128,8 +132,16 @@ class Score(object):
         if score != self.get_score():
             self._history.append((change.time, score))
 
+    #!!!ECOO scoring
     def get_score(self):
-        return self._history[-1][1] if len(self._history) > 0 else 0.0
+        #logger.info("# of submissions = %d" % len(self._history))
+        if len(self._history) > 0 and self._history[-1][1] > 0.0: #If there exists a submission and it is non-zero
+            return self._history[-1][1] + (CONTEST_END - self._history[-1][0]) / 300.0 #!!!ECOO Time Bonus
+        else:
+            return 0.0
+
+	#!!! Old scoring format
+        #return self._history[-1][1] if len(self._history) > 0 else 0.0
 
     def reset_history(self):
         # Delete everything except the submissions and the subchanges.
@@ -186,7 +198,7 @@ class Score(object):
     def delete_subchange(self, key):
         # Delete the subchange from the (sorted) list and reset the
         # history.
-        self._changes = filter(lambda a: a.key != key, self._changes)
+        self._changes = [c for c in self._changes if c.key != key]
         self.reset_history()
         logger.info("Reset history after deleting subchange '%s'", key)
 
@@ -212,8 +224,7 @@ class Score(object):
         if key in self._submissions:
             del self._submissions[key]
             # Delete all its subchanges.
-            self._changes = filter(lambda a: a.submission != key,
-                                   self._changes)
+            self._changes = [c for c in self._changes if c.submission != key]
             self.reset_history()
 
     def update_score_mode(self, score_mode):
@@ -246,9 +257,15 @@ class ScoringStore(object):
         subchange_store.add_delete_callback(self.delete_subchange)
 
         self._scores = dict()
-
         self._callbacks = list()
 
+    def init_store(self):
+        """Load the scores from the stores.
+
+        This method must be called by RankingWebServer after it
+        finishes loading the data from disk.
+
+        """
         for key, value in submission_store._store.iteritems():
             self.create_submission(key, value)
         for key, value in sorted(subchange_store._store.iteritems()):

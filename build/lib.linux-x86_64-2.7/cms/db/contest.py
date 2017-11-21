@@ -3,10 +3,11 @@
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
-# Copyright © 2010-2013 Stefano Maggiolo <s.maggiolo@gmail.com>
+# Copyright © 2010-2016 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
 # Copyright © 2012-2014 Luca Wehrstedt <luca.wehrstedt@gmail.com>
 # Copyright © 2013 Bernard Blackham <bernard@largestprime.net>
+# Copyright © 2016 Myungwoo Chun <mc.tamaki@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -32,12 +33,12 @@ from __future__ import unicode_literals
 from datetime import datetime, timedelta
 
 from sqlalchemy.schema import Column, ForeignKey, CheckConstraint
-from sqlalchemy.types import Integer, Unicode, DateTime, Interval, Enum
+from sqlalchemy.types import Integer, Unicode, DateTime, Interval, Enum, \
+    Boolean
 from sqlalchemy.orm import relationship, backref
 
 from . import Base, RepeatedUnicode
 
-from cms import DEFAULT_LANGUAGES
 from cmscommon.datetime import make_datetime
 
 
@@ -57,28 +58,74 @@ class Contest(Base):
         Integer,
         primary_key=True)
 
-    # Short name of the contest, and longer description. Both human
-    # readable.
+    # Short name of the contest.
     name = Column(
         Unicode,
-        nullable=False)
+        nullable=False,
+        unique=True)
+    # Description of the contest (human readable).
     description = Column(
         Unicode,
         nullable=False)
 
     # The list of language codes of the localizations that contestants
-    # are allowed to use.
+    # are allowed to use (empty means all).
     allowed_localizations = Column(
         RepeatedUnicode(),
         nullable=False,
         default=[])
 
-    # The list of languages shorthand allowed in the contest,
-    # e.g. cpp. The codes must be the same as those in cms.LANGUAGES.
+    # The list of names of languages allowed in the contest.
     languages = Column(
         RepeatedUnicode(),
         nullable=False,
-        default=DEFAULT_LANGUAGES)
+        default=["C11 / gcc", "C++11 / g++", "Pascal / fpc"])
+
+    # Whether contestants allowed to download their submissions.
+    submissions_download_allowed = Column(
+        Boolean,
+        nullable=False,
+        default=True)
+
+    # Whether the user question is enabled.
+    allow_questions = Column(
+        Boolean,
+        nullable=False,
+        default=True)
+
+    # Whether the user test interface is enabled.
+    allow_user_tests = Column(
+        Boolean,
+        nullable=False,
+        default=True)
+
+    # Whether to prevent hidden participations to log in.
+    block_hidden_participations = Column(
+        Boolean,
+        nullable=False,
+        default=False)
+
+    # Whether to allow username/password authentication
+    allow_password_authentication = Column(
+        Boolean,
+        nullable=False,
+        default=True)
+
+    # Whether to enforce that the IP address of the request matches
+    # the IP address or subnet specified for the participation (if
+    # present).
+    ip_restriction = Column(
+        Boolean,
+        nullable=False,
+        default=True)
+
+    # Whether to automatically log in users connecting from an IP
+    # address specified in the ip field of a participation to this
+    # contest.
+    ip_autologin = Column(
+        Boolean,
+        nullable=False,
+        default=False)
 
     # The parameters that control contest-tokens follow. Note that
     # their effect during the contest depends on the interaction with
@@ -138,11 +185,11 @@ class Contest(Base):
     start = Column(
         DateTime,
         nullable=False,
-        default=datetime(2000, 01, 01))
+        default=datetime(2000, 1, 1))
     stop = Column(
         DateTime,
         nullable=False,
-        default=datetime(2100, 01, 01))
+        default=datetime(2100, 1, 1))
 
     # Timezone for the contest. All timestamps in CWS will be shown
     # using the timezone associated to the logged-in user or (if it's
@@ -194,7 +241,7 @@ class Contest(Base):
     # SQLAlchemy.
     # tasks (list of Task objects)
     # announcements (list of Announcement objects)
-    # users (list of User objects)
+    # participations (list of Participation objects)
 
     # Moreover, we have the following methods.
     # get_submissions (defined in __init__.py)
@@ -235,22 +282,6 @@ class Contest(Base):
                 return idx
         raise KeyError("Task not found")
 
-    # FIXME - Use SQL syntax
-    def get_user(self, username):
-        """Return the first user in the contest with the given name.
-
-        username (string): the name of the user we are interested in.
-
-        return (User): the corresponding user object.
-
-        raise (KeyError): if no users with the given name are found.
-
-        """
-        for user in self.users:
-            if user.username == username:
-                return user
-        raise KeyError("User not found")
-
     def enumerate_files(self, skip_submissions=False, skip_user_tests=False,
                         skip_generated=False):
         """Enumerate all the files (by digest) referenced by the
@@ -262,6 +293,7 @@ class Contest(Base):
         """
         # Here we cannot use yield, because we want to detect
         # duplicates
+
         files = set()
         for task in self.tasks:
 
@@ -448,7 +480,7 @@ class Contest(Base):
                 next_gen_time,
                 expiration if expiration > timestamp else None)
 
-    def tokens_available(self, username, task_name, timestamp=None):
+    def tokens_available(self, participation, task, timestamp=None):
         """Return three pieces of data:
 
         [0] the number of available tokens for the user to play on the
@@ -490,8 +522,8 @@ class Contest(Base):
         future. Also, if r[0] == 0 and r[1] is None, then r[2] should
         be ignored.
 
-        username (string): the username of the user.
-        task_name (string): the name of the task.
+        participation (Participation): the participation.
+        task (Task): the task.
         timestamp (datetime|None): the time relative to which making
             the calculation, or None to use now.
 
@@ -502,16 +534,13 @@ class Contest(Base):
         if timestamp is None:
             timestamp = make_datetime()
 
-        user = self.get_user(username)
-        task = self.get_task(task_name)
-
         # Take the list of the tokens already played (sorted by time).
-        tokens = user.get_tokens()
+        tokens = participation.get_tokens()
         token_timestamps_contest = sorted([token.timestamp
                                            for token in tokens])
         token_timestamps_task = sorted([
             token.timestamp for token in tokens
-            if token.submission.task.name == task_name])
+            if token.submission.task.name == task.name])
 
         # If the contest is USACO-style (i.e., the time for each user
         # start when he/she logs in for the first time), then we start
@@ -519,7 +548,7 @@ class Contest(Base):
         # from the start of the contest.
         start = self.start
         if self.per_user_time is not None:
-            start = user.starting_time
+            start = participation.starting_time
 
         # Compute separately for contest-wise and task-wise.
         res_contest = Contest._tokens_available(

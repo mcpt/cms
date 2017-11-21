@@ -3,11 +3,12 @@
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2015 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
-# Copyright © 2010-2015 Stefano Maggiolo <s.maggiolo@gmail.com>
+# Copyright © 2010-2017 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
 # Copyright © 2013 Bernard Blackham <bernard@largestprime.net>
 # Copyright © 2013-2014 Luca Wehrstedt <luca.wehrstedt@gmail.com>
 # Copyright © 2014 Fabian Gundlach <320pointsguy@gmail.com>
+# Copyright © 2016 Myungwoo Chun <mc.tamaki@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -36,11 +37,27 @@ from collections import namedtuple
 
 from sqlalchemy.orm import joinedload
 
-from cms import config, \
-    LANG_C, LANG_CPP, LANG_PASCAL, LANG_PYTHON, LANG_PHP, LANG_JAVA, LANG_TURING, \
-    SCORE_MODE_MAX, SCORE_MODE_MAX_TOKENED_LAST, SCORE_MODE_ECOO, SCORE_MODE_MAX_JDCC
+from cms import SCORE_MODE_MAX, config
 from cms.db import Submission
 from cms.grading.Sandbox import Sandbox
+
+from .language import Language, CompiledLanguage
+
+
+__all__ = [
+    # __init__.py
+    "JobException",
+    "COMPILATION_MESSAGES", "EVALUATION_MESSAGES",
+    "format_status_text",
+    "compilation_step", "evaluation_step",
+    "evaluation_step_before_run", "evaluation_step_after_run",
+    "human_evaluation_message", "is_evaluation_passed",
+    "filter_ansi_escape", "extract_outcome_and_text",
+    "white_diff_step",
+    "compute_changes_for_dataset", "task_score",
+    # language.py
+    "Language", "CompiledLanguage",
+]
 
 
 logger = logging.getLogger(__name__)
@@ -136,6 +153,10 @@ EVALUATION_MESSAGES = MessageCollection([
     HumanMessage("success",
                  N_("Output is correct"),
                  N_("Your submission ran and gave the correct answer")),
+    HumanMessage("partial",
+                 N_("Output is partially correct"),
+                 N_("Your submission ran and gave the partially correct "
+                    "answer")),
     HumanMessage("wrong",
                  N_("Output isn't correct"),
                  N_("Your submission ran, but gave the wrong answer")),
@@ -191,118 +212,6 @@ class JobException(Exception):
         return "JobException(\"%s\")" % (repr(self.msg))
 
 
-def get_compilation_commands(language, source_filenames, executable_filename,
-                             for_evaluation=True):
-    """Return the compilation commands.
-
-    The compilation commands are for the specified language, source
-    filenames and executable filename. Each command is a list of
-    strings, suitable to be passed to the methods in subprocess
-    package.
-
-    language (string): one of the recognized languages.
-    source_filenames ([string]): a list of the string that are the
-        filenames of the source files to compile; the order is
-        relevant: the first file must be the one that contains the
-        program entry point (with some langages, e.g. Pascal, only the
-        main file must be passed to the compiler).
-    executable_filename (string): the output file.
-    for_evaluation (bool): if True, define EVAL during the compilation;
-        defaults to True.
-
-    return ([[string]]): a list of commands, each a list of strings to
-        be passed to subprocess.
-
-    """
-    commands = []
-    if language == LANG_C:
-        command = ["/usr/bin/gcc"]
-        if for_evaluation:
-            command += ["-DEVAL"]
-        command += ["-static", "-O2", "-o", executable_filename]
-        command += source_filenames
-        command += ["-lm"]
-        commands.append(command)
-    elif language == LANG_CPP:
-        command = ["/usr/bin/g++"]
-        if for_evaluation:
-            command += ["-DEVAL"]
-        command += ["-static", "-O2", "-o", executable_filename]
-        command += source_filenames
-        commands.append(command)
-    elif language == LANG_PASCAL:
-        command = ["/usr/bin/fpc"]
-        if for_evaluation:
-            command += ["-dEVAL"]
-        command += ["-XS", "-O2", "-o%s" % executable_filename]
-        command += [source_filenames[0]]
-        commands.append(command)
-    elif language == LANG_PYTHON:
-        # The executable name is fixed, and there is no way to specify
-        # the name of the pyc, so we need to bundle together two
-        # commands (compilation and rename).
-        # In order to use Python 3 change them to:
-        # /usr/bin/python3 -m py_compile %s
-        # mv __pycache__/%s.*.pyc %s
-        py_command = ["/usr/bin/python2", "-m", "py_compile",
-                      source_filenames[0]]
-        mv_command = ["/bin/mv", "%s.pyc" % os.path.splitext(os.path.basename(
-                      source_filenames[0]))[0], executable_filename]
-        commands.append(py_command)
-        commands.append(mv_command)
-    elif language == LANG_PHP:
-        command = ["/bin/cp", source_filenames[0], executable_filename]
-        commands.append(command)
-    elif language == LANG_JAVA:
-        class_name = os.path.splitext(source_filenames[0])[0]
-        command = ["/usr/bin/gcj", "--main=%s" % class_name, "-O3", "-o",
-                   executable_filename] + source_filenames
-        commands.append(command)
-    elif language == LANG_TURING:
-        command = ["/usr/bin/tprologc"]
-        command += [source_filenames[0]]
-        command += ["-O2"]
-        command += [executable_filename]
-        commands.append(command)
-    else:
-        raise ValueError("Unknown language %s." % language)
-    return commands
-
-
-def get_evaluation_commands(language, executable_filename):
-    """Return the evaluation commands.
-
-    The evaluation commands are for the given language and executable
-    filename. Each command is a list of strings, suitable to be passed
-    to the methods in subprocess package.
-
-    language (string): one of the recognized languages.
-    executable_filename (string): the name of the executable.
-
-    return ([[string]]): a list of string to be passed to subprocess.
-
-    """
-    commands = []
-    if language in (LANG_C, LANG_CPP, LANG_PASCAL, LANG_JAVA):
-        command = [os.path.join(".", executable_filename)]
-        commands.append(command)
-    elif language == LANG_TURING:
-        command = ["/usr/bin/tprolog"]
-        command += [executable_filename]
-        commands.append(command)
-    elif language == LANG_PYTHON:
-        # In order to use Python 3 change it to:
-        # /usr/bin/python3 %s
-        command = ["/usr/bin/python2", executable_filename]
-        commands.append(command)
-    elif language == LANG_PHP:
-        command = ["/usr/bin/php5", executable_filename]
-        commands.append(command)
-    else:
-        raise ValueError("Unknown language %s." % language)
-    return commands
-
-
 def format_status_text(status, translator=None):
     """Format the given status text in the given locale.
 
@@ -333,7 +242,10 @@ def format_status_text(status, translator=None):
         elif not isinstance(status, list):
             raise TypeError("Invalid type: %r" % type(status))
 
-        return translator(status[0]) % tuple(status[1:])
+        # translator('') gives, for some reason, the first lines of
+        # the po file.
+        text = translator(status[0]) if status[0] != '' else ''
+        return text % tuple(status[1:])
     except:
         logger.error("Unexpected error when formatting status "
                      "text: %r", status, exc_info=True)
@@ -353,31 +265,54 @@ def compilation_step(sandbox, commands):
     """
     # Set sandbox parameters suitable for compilation.
     sandbox.dirs += [("/etc", None, None)]
-    sandbox.add_mapped_directories(["/home/wlmacadmin/tprolog/support"])
+    # We need to add "/var/lib/ghc" to the unrestricted dirs so GHC can access
+    # haskell's package database.
+    # GHC looks for it in "/usr/lib/ghc/package.conf.d", which is only a
+    # symlink to "/var/lib/ghc/package.conf.d"
+    ghc_dir = "/var/lib/ghc"
+    if os.path.exists(ghc_dir):
+        sandbox.dirs += [("/var/lib/ghc", None, None)]
     sandbox.preserve_env = True
     sandbox.max_processes = None
     sandbox.timeout = 10
     sandbox.wallclock_timeout = 20
     sandbox.address_space = 512 * 1024
-    sandbox.stdout_file = "compiler_stdout.txt"
-    sandbox.stderr_file = "compiler_stderr.txt"
 
-    # Actually run the compilation commands.
+    # Actually run the compilation commands, logging stdout and stderr.
     logger.debug("Starting compilation step.")
-    for command in commands:
+    stdouts = []
+    stderrs = []
+    for step, command in enumerate(commands):
+        # Keep stdout and stderr of each compilation step
+        sandbox.stdout_file = "compiler_stdout_%d.txt" % step
+        sandbox.stderr_file = "compiler_stderr_%d.txt" % step
+
         box_success = sandbox.execute_without_std(command, wait=True)
         if not box_success:
             logger.error("Compilation aborted because of "
                          "sandbox error in `%s'.", sandbox.path)
             return False, None, None, None
+        stdout = unicode(sandbox.get_file_to_string(sandbox.stdout_file),
+                         "utf-8", errors="replace").strip()
+        if stdout != "":
+            stdouts.append(stdout)
+        stderr = unicode(sandbox.get_file_to_string(sandbox.stderr_file),
+                         "utf-8", errors="replace").strip()
+        if stderr != "":
+            stderrs.append(stderr)
+
+        # If some command in the sequence is failed,
+        # there is no reason to continue
+        if (sandbox.get_exit_status() != Sandbox.EXIT_OK or
+                sandbox.get_exit_code() != 0):
+            break
 
     # Detect the outcome of the compilation.
     exit_status = sandbox.get_exit_status()
     exit_code = sandbox.get_exit_code()
-    stdout = sandbox.get_file_to_string("compiler_stdout.txt")
-    stdout = unicode(stdout, 'utf-8', errors='replace')
-    stderr = sandbox.get_file_to_string("compiler_stderr.txt")
-    stderr = unicode(stderr, 'utf-8', errors='replace')
+
+    stdout = '\n===\n'.join(stdouts)
+    stderr = '\n===\n'.join(stderrs)
 
     # And retrieve some interesting data.
     plus = {
@@ -510,7 +445,6 @@ def evaluation_step_before_run(sandbox, command,
     """
     # Default parameters handling.
     allow_dirs = [] if allow_dirs is None else allow_dirs
-    allow_dirs.append("/home/wlmacadmin/tprolog/support")
     writable_files = [] if writable_files is None else writable_files
 
     # Set sandbox parameters suitable for evaluation.
@@ -622,6 +556,28 @@ def evaluation_step_after_run(sandbox):
     return success, plus
 
 
+def merge_evaluation_results(plus0, plus1):
+    """Merges two evaluation results provided by different sandboxes.
+
+    """
+    plus = plus0.copy()
+    plus["execution_time"] += plus1["execution_time"]
+    plus["execution_wall_clock_time"] = max(
+        plus["execution_wall_clock_time"],
+        plus1["execution_wall_clock_time"])
+    plus["execution_memory"] += plus1["execution_memory"]
+    if plus0["exit_status"] == Sandbox.EXIT_OK:
+        plus["exit_status"] = plus1["exit_status"]
+        if plus1["exit_status"] == Sandbox.EXIT_SIGNAL:
+            plus["signal"] = plus1["signal"]
+        elif plus1["exit_status"] == Sandbox.EXIT_SYSCALL:
+            plus["syscall"] = plus1["syscall"]
+        elif plus1["exit_status"] == Sandbox.EXIT_FILE_ACCESS:
+            plus["filename"] = plus1["filename"]
+
+    return plus
+
+
 def human_evaluation_message(plus):
     """Given the plus object returned by evaluation_step, builds a
     human-readable message about what happened.
@@ -639,11 +595,11 @@ def human_evaluation_message(plus):
     elif exit_status == Sandbox.EXIT_TIMEOUT_WALL:
         return [EVALUATION_MESSAGES.get("walltimeout").message]
     elif exit_status == Sandbox.EXIT_SIGNAL:
-        return [EVALUATION_MESSAGES.get("signal").message % plus['signal']]
+        return [EVALUATION_MESSAGES.get("signal").message, plus['signal']]
     elif exit_status == Sandbox.EXIT_SANDBOX_ERROR:
         return None
     elif exit_status == Sandbox.EXIT_SYSCALL:
-        return [EVALUATION_MESSAGES.get("syscall").message % plus['syscall']]
+        return [EVALUATION_MESSAGES.get("syscall").message, plus['syscall']]
     elif exit_status == Sandbox.EXIT_FILE_ACCESS:
         # Don't tell which file: would be too much information!
         return [EVALUATION_MESSAGES.get("fileaccess").message]
@@ -714,6 +670,17 @@ def extract_outcome_and_text(sandbox):
     except ValueError:
         logger.error("Wrong outcome `%s' from manager.", outcome)
         raise ValueError("Outcome is not a float.")
+
+    # If the text starts with translate, the manager is asking us to
+    # use a stock message, that can be translated.
+    if text.startswith("translate:"):
+        remaining = text[len("translate:"):].strip()
+        if remaining in ["success", "partial", "wrong"]:
+            text = EVALUATION_MESSAGES.get(remaining).message
+        else:
+            remaining = remaining[:15]  # to avoid logging lots of text
+            logger.warning("Manager asked to translate text, but string "
+                           "'%s' is not recognized." % remaining)
 
     return outcome, [text]
 
@@ -858,7 +825,7 @@ def compute_changes_for_dataset(old_dataset, new_dataset):
     submissions = \
         task.sa_session.query(Submission)\
             .filter(Submission.task == task)\
-            .options(joinedload(Submission.user))\
+            .options(joinedload(Submission.participation))\
             .options(joinedload(Submission.token))\
             .options(joinedload(Submission.results)).all()
 
@@ -885,10 +852,11 @@ def compute_changes_for_dataset(old_dataset, new_dataset):
 
 ## Computing global scores (for ranking). ##
 
-def task_score(user, task):
-    """Return the score of a user on a task.
+def task_score(participation, task):
+    """Return the score of a contest's user on a task.
 
-    user (User): the user for which to compute the score.
+    participation (Participation): the user and contest for which to
+        compute the score.
     task (Task): the task for which to compute the score.
 
     return ((float, bool)): the score of user on task, and True if the
@@ -907,7 +875,7 @@ def task_score(user, task):
     # / evaluated / scored.
     partial = False
 
-    submissions = [s for s in user.submissions if s.task is task]
+    submissions = [s for s in participation.submissions if s.task is task]
     submissions.sort(key=lambda s: s.timestamp)
 
     if submissions == []:

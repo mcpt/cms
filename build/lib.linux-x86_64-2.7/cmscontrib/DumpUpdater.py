@@ -3,8 +3,9 @@
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2013 Luca Wehrstedt <luca.wehrstedt@gmail.com>
-# Copyright © 2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
+# Copyright © 2013-2015 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
 # Copyright © 2014 William Di Luigi <williamdiluigi@gmail.com>
+# Copyright © 2016 Stefano Maggiolo <s.maggiolo@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -42,6 +43,7 @@ import json
 import logging
 import os
 import shutil
+import sys
 
 from cms import utf8_decoder
 from cmscommon.archive import Archive
@@ -70,7 +72,7 @@ def main():
 
     if not os.path.exists(path):
         logger.critical("The given path doesn't exist")
-        return
+        return 1
 
     archive = None
     if Archive.is_supported(path):
@@ -82,7 +84,7 @@ def main():
             logger.critical("Cannot find a root directory in the "
                             "archive.")
             archive.cleanup()
-            return False
+            return 1
 
         path = os.path.join(path, file_names[0])
 
@@ -93,7 +95,7 @@ def main():
         logger.critical(
             "The given path doesn't contain a contest dump in a format "
             "CMS is able to understand.")
-        return
+        return 1
 
     with io.open(path, 'rb') as fin:
         data = json.load(fin, encoding="utf-8")
@@ -105,15 +107,30 @@ def main():
     if dump_version == to_version:
         logger.info(
             "The dump you're trying to update is already stored using "
-            "the most recent format supported by this version of CMS.")
-        return
+            "the target format (which is version %d).", dump_version)
+        return 1
 
-    if dump_version > to_version:
+    elif dump_version > model_version:
         logger.critical(
-            "The dump you're trying to update is stored using a format "
-            "that's more recent than the one supported by this version "
-            "of CMS. You probably need to update CMS to handle it.")
-        return
+            "The dump you're trying to update is stored using data model "
+            "version %d, which is more recent than the one supported by "
+            "this version of CMS (version %d). You probably need to "
+            "update CMS to handle it.", dump_version, model_version)
+        return 1
+
+    elif to_version > model_version:
+        logger.critical(
+            "The target data model (version %d) you're trying to update "
+            "to is too recent for this version of CMS (which supports up "
+            "to version %d). You probably need to update CMS to handle "
+            "it.", to_version, model_version)
+        return 1
+
+    elif dump_version > to_version:
+        logger.critical(
+            "Backward updating (from version %d to version %d) is not "
+            "supported.", dump_version, to_version)
+        return 1
 
     for version in range(dump_version, to_version):
         # Update from version to version+1
@@ -134,6 +151,8 @@ def main():
         archive.repack(os.path.abspath(archive.path))
         archive.cleanup()
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

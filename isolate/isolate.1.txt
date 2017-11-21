@@ -76,6 +76,12 @@ OPTIONS
 	Limit process stack to 'size' kilobytes. By default, the whole address
 	space is available for the stack, but it is subject to the *--mem* limit.
 
+*-f, --fsize=*'size'::
+	Limit size of files created (or modified) by the program to 'size' kilobytes.
+	In most cases, it is better to restrict overall disk usage by a disk quota
+	(see below). This option can help in cases when quotas are not enabled
+	on the underlying filesystem.
+
 *-q, --quota=*'blocks'*,*'inodes'::
 	Set disk quota to a given number of blocks and inodes. This requires the
 	filesystem to be mounted with support for quotas.
@@ -100,7 +106,14 @@ OPTIONS
 	Permit the program to create up to 'max' processes and/or threads. Please
 	keep in mind that time and memory limit do not work with multiple processes
 	unless you enable the control group mode. If 'max' is not given, an arbitrary
-	number of processes can be run.
+	number of processes can be run. By default, only one process is permitted.
+
+*--share-net*::
+	By default, isolate creates a new network namespace for its child process.
+	This namespace contains no network devices except for a per-namespace loopback.
+	This prevents the program from communicating with the outside world. If you want
+	to permit communication, you can use this switch to keep the child process
+	in parent's network namespace.
 
 *-v, --verbose*::
 	Tell the sandbox manager to be verbose and report on what is going on.
@@ -174,14 +187,17 @@ that this feature needs special system setup described in the REQUIREMENTS
 section.
 
 *--cg*::
-	Enable use of control groups.
+	Enable use of control groups. This should be specified with *--init*,
+	*--run* and *--cleanup*.
 
 *--cg-mem=*'size'::
 	Limit total memory usage by the whole control group to 'size' kilobytes.
+	This should be specified with *--run*.
 
 *--cg-timing*::
 	Use control groups for timing, so that the *--time* switch affects the
 	total run time of all processes and threads in the control group.
+	This should be specified with *--run*.
 
 META-FILES
 ----------
@@ -236,20 +252,38 @@ network namespaces (+CONFIG_NET_NS+).
 If you want to use control groups, you need
 the cpusets (+CONFIG_CPUSETS+),
 CPU accounting controller (+CONFIG_CGROUP_CPUACCT+), and
-memory resource controller (+CONFIG_CGROUP_MEM_RES_CTLR+).
+memory resource controller (+CONFIG_MEMCG+). If your machine has swap enabled,
+you should also enable the swap controller (+CONFIG_MEMCG_SWAP+).
+
+Debian 7.x and newer require enabling the memory and swap cgroup controllers by
+adding the parameters "cgroup_enable=memory swapaccount=1" to the kernel
+command-line, which can be set using GRUB_CMDLINE_LINUX_DEFAULT in
+/etc/default/grub.
 
 Isolate is designed to run setuid to root. The sub-process inside the sandbox
 then switches to a non-privileged user ID (different for each *--box-id*).
 The range of UIDs available and several filesystem paths are embedded in the
-isolate's binary during compilation; please see +default.cfg+ in the source
+isolate's binary during compilation; please see +config.h+ in the source
 tree for description.
 
-Before you run isolate with control groups, you have to mount the control group
-filesystem. Most modern Linux distributions use libcgroup, which mounts a tmpfs
-at /sys/fs/cgroup, with individual controllers mounted within subdirectories.
-It is recommended to use your distribution's cgroup configuration support.
-Debian-based distributions have a choice of the cgroup-lite or cgroup-bin
-packages; Red Hat-based distributions provide the libcgroup package.
+Before you run isolate with control groups, you need to ensure that the cgroup
+filesystem is enabled and mounted.  Most modern Linux distributions already
+provide cgroup support through a tmpfs mounted at /sys/fs/cgroup, with
+individual controllers mounted within subdirectories.
+
+REPRODUCIBILITY
+---------------
+
+The reproducibility of results can be improved by tuning some kernel
+parameters:
+
+* Disable address space randomization: +sysctl kernel.randomize_va_space=0+.
+Address space randomization can affect timing, memory usage, and program
+behavior. This setting can be made persistent through /etc/sysctl.d/.
+
+* Disable dynamic CPU frequency scaling. This requires setting the cpufreq
+scaling governor to +performance+. The process for doing this varies between
+distributions.
 
 LICENSE
 -------

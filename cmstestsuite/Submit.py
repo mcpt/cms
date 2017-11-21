@@ -54,29 +54,24 @@ def harvest_contest_data(contest_id):
     return users, tasks
 
 
-def submit_solution(username, password, task, files, base_url=None):
-    def step(request):
-        request.prepare()
-        request.execute()
-
+def submit_solution(
+        username, password, task, files, language=None, base_url=None):
     browser = mechanize.Browser()
     browser.set_handle_robots(False)
 
-    step(LoginRequest(browser, username, password, base_url=base_url))
-    step(SubmitRequest(browser, task, base_url=base_url, filename=files[0]))
+    LoginRequest(browser, username, password, base_url=base_url).execute()
+    SubmitRequest(browser, task, base_url=base_url,
+                  filename=files[0], language=language)\
+        .execute()
 
 
 def release_test(username, password, task, submission_num, base_url=None):
-    def step(request):
-        request.prepare()
-        request.execute()
-
     browser = mechanize.Browser()
     browser.set_handle_robots(False)
 
-    step(LoginRequest(browser, username, password, base_url=base_url))
-    step(TokenRequest(
-        browser, task, base_url=base_url, submission_num=submission_num))
+    LoginRequest(browser, username, password, base_url=base_url).execute()
+    TokenRequest(browser, task, base_url=base_url,
+                 submission_num=submission_num).execute()
 
 
 def main():
@@ -85,6 +80,9 @@ def main():
     parser.add_option("-c", "--contest",
                       help="contest ID to export", dest="contest_id",
                       action="store", type="int", default=None)
+    parser.add_option("-l", "--language",
+                      help="submission language",
+                      action="store", default=None, dest="language")
     parser.add_option("-u", "--base-url",
                       help="base URL for placing HTTP requests",
                       action="store", default=None, dest="base_url")
@@ -107,7 +105,8 @@ def main():
 
     password = users[username]['password']
 
-    submit_solution(username, password, task, files, base_url=options.base_url)
+    submit_solution(username, password, task, files, args.language,
+                    base_url=options.base_url)
 
 
 if __name__ == '__main__':
