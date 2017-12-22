@@ -30,7 +30,7 @@ from cmsranking.Submission import store as submission_store
 from cmsranking.Subchange import store as subchange_store
 from cmsranking.Task import store as task_store
 
-CONTEST_END = 1509573600
+CONTEST_END = 1513800000
 #!!!Contest End (GMT, epoch time in seconds)
 
 logger = logging.getLogger(__name__)
@@ -136,7 +136,7 @@ class Score(object):
     def get_score(self):
         #logger.info("# of submissions = %d" % len(self._history))
         if len(self._history) > 0 and self._history[-1][1] > 0.0: #If there exists a submission and it is non-zero
-            return self._history[-1][1] + (CONTEST_END - self._history[-1][0]) / 300.0 #!!!ECOO Time Bonus
+            return self._history[-1][1] + int(CONTEST_END - self._history[-1][0]) / 300 #!!!ECOO Time Bonus
         else:
             return 0.0
 

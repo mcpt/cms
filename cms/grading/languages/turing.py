@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Python 3 programming language definition."""
+"""Turing Bytecode Grader"""
 
 from __future__ import absolute_import
 from __future__ import print_function
@@ -26,23 +26,23 @@ from __future__ import unicode_literals
 from cms.grading import Language
 
 
-__all__ = ["Python3CPython"]
+__all__ = ["Turing"]
 
 
-class Python3CPython(Language):
+class Turing(Language):
     """
-    Some form of Py3
+    Ying Ted's Turing Compiler Bytecode Grader
     """
 
     @property
     def name(self):
         """See Language.name."""
-        return "Python 3 / CPython"
+        return "Turing"
 
     @property
     def source_extensions(self):
         """See Language.source_extensions."""
-        return [".py"]
+        return [".tbc"]
 
     def get_compilation_commands(self,
                                  source_filenames, executable_filename,
@@ -54,4 +54,4 @@ class Python3CPython(Language):
             self, executable_filename, main=None, args=None):
         """See Language.get_evaluation_commands."""
         args = args if args is not None else []
-        return [["/usr/bin/python3", executable_filename] + args]
+        return [["/usr/bin/tprolog", executable_filename] + args]

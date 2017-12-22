@@ -57,6 +57,8 @@ cms/grading/languages/pascal_fpc.py
 cms/grading/languages/php.py
 cms/grading/languages/python2_cpython.py
 cms/grading/languages/python3_cpython.py
+cms/grading/languages/ruby.py
+cms/grading/languages/turing.py
 cms/grading/scoretypes/GroupMin.py
 cms/grading/scoretypes/GroupMul.py
 cms/grading/scoretypes/GroupThreshold.py
