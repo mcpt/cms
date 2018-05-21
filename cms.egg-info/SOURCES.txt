@@ -215,6 +215,7 @@ cms/server/contest/handlers/taskusertest.py
 cms/server/contest/static/cws_style.css
 cms/server/contest/static/cws_utils.js
 cms/server/contest/static/css/bootstrap.css
+cms/server/contest/static/img/DO_logo.svg
 cms/server/contest/static/img/glyphicons-halflings-white.png
 cms/server/contest/static/img/glyphicons-halflings.png
 cms/server/contest/static/img/mimetypes/application-x-executable.png
@@ -237,6 +238,7 @@ cms/server/contest/static/js/bootstrap.js
 cms/server/contest/templates/base.html
 cms/server/contest/templates/communication.html
 cms/server/contest/templates/documentation.html
+cms/server/contest/templates/err.log
 cms/server/contest/templates/error.html
 cms/server/contest/templates/overview.html
 cms/server/contest/templates/printing.html

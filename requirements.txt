@@ -1,10 +1,10 @@
 tornado==4.1
 psycopg2==2.6
-sqlalchemy>=0.9,<1.1
+sqlalchemy==0.9
 netifaces==0.10.4
 pycrypto==2.6.1
 pytz==2015.4
-psutil>=0.6,<4.3
+psutil==0.6
 six==1.9
 requests==2.7
 gevent==1.0.2

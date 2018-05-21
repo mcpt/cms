@@ -1,14 +1,177 @@
-2017-12-20 10:14:28,106 - INFO [<unknown>] Using configuration file /usr/local/etc/cms.conf.
-2017-12-20 10:14:28,106 - WARNING [<unknown>] The 'is_proxy_used' setting is deprecated, please use 'num_proxies_used' instead.
-2017-12-20 10:14:28,517 - INFO [Resource,0] Established connection with localhost:29000 (LogService,0).
-2017-12-20 10:14:28,681 - INFO [Resource,0] ResourceService 0 up and running!
-2017-12-20 10:14:28,694 - INFO [Resource,0] Restarting (Checker, 0)...
-2017-12-20 10:14:28,713 - INFO [Resource,0] Restarting (ContestWebServer, 0)...
-2017-12-20 10:14:28,753 - INFO [Resource,0] Restarting (EvaluationService, 0)...
-2017-12-20 10:14:28,796 - INFO [Resource,0] Restarting (PrintingService, 0)...
-2017-12-20 10:14:28,841 - INFO [Resource,0] Restarting (ProxyService, 0)...
-2017-12-20 10:14:28,908 - INFO [Resource,0] Restarting (ScoringService, 0)...
-2017-12-20 10:14:28,970 - INFO [Resource,0] Restarting (Worker, 0)...
-2017-12-20 10:14:29,050 - INFO [Resource,0] Restarting (Worker, 1)...
-2017-12-20 10:14:29,086 - INFO [Resource,0] Established connection with 127.0.0.1:39222.
-2017-12-20 10:14:30,428 - INFO [Resource,0] Established connection with 127.0.0.1:39306.
+2018-04-17 18:03:49.388  INF  Using config file /usr/local/etc/cms.ranking.conf.
+
+127.0.0.1 - - [2018-04-17 18:04:14] "PUT /contests/ HTTP/1.1" 204 124 0.008043
+127.0.0.1 - - [2018-04-17 18:04:14] "PUT /tasks/ HTTP/1.1" 204 124 0.004265
+127.0.0.1 - - [2018-04-17 18:04:14] "PUT /users/ HTTP/1.1" 204 124 0.200197
+127.0.0.1 - - [2018-04-17 18:04:14] "PUT /submissions/ HTTP/1.1" 204 124 0.002202
+2018-04-17 18:04:15.045  INF  Reset history for user 'dmci1' and task 'B1' after creating subchange '152397609438s' for submission '38'
+
+127.0.0.1 - - [2018-04-17 18:04:15] "PUT /subchanges/ HTTP/1.1" 204 124 0.004013
+127.0.0.1 - - [2018-04-17 18:04:15] "PUT /submissions/ HTTP/1.1" 204 124 0.009092
+2018-04-17 18:04:15.254  INF  Reset history for user 'rci1' and task 'B2' after creating subchange '152397714944s' for submission '44'
+
+2018-04-17 18:04:15.256  INF  Reset history for user 'wlm4' and task 'B2' after creating subchange '152397771251s' for submission '51'
+
+2018-04-17 18:04:15.258  INF  Reset history for user 'nss3' and task 'B2' after creating subchange '152397711443s' for submission '43'
+
+2018-04-17 18:04:15.259  INF  Reset history for user 'nss2' and task 'B1' after creating subchange '152397695842s' for submission '42'
+
+2018-04-17 18:04:15.284  INF  Reset history for user 'wlm4' and task 'B1' after creating subchange '152397609939s' for submission '39'
+
+127.0.0.1 - - [2018-04-17 18:04:15] "PUT /subchanges/ HTTP/1.1" 204 124 0.033040
+127.0.0.1 - - [2018-04-17 18:04:15] "PUT /submissions/ HTTP/1.1" 204 124 0.049029
+2018-04-17 18:04:15.482  INF  Reset history for user 'rci1' and task 'B1' after creating subchange '152397793654s' for submission '54'
+
+2018-04-17 18:04:15.483  INF  Reset history for user 'wlm6' and task 'B2' after creating subchange '152397835765s' for submission '65'
+
+2018-04-17 18:04:15.484  INF  Reset history for user 'nss3' and task 'B1' after creating subchange '152397804557s' for submission '57'
+
+2018-04-17 18:04:15.486  INF  Reset history for user 'nss3' and task 'B1' after creating subchange '152397813558s' for submission '58'
+
+2018-04-17 18:04:15.487  INF  Reset history for user 'gvss1' and task 'B2' after creating subchange '152397822362s' for submission '62'
+
+2018-04-17 18:04:15.493  INF  Reset history for user 'wlm6' and task 'B2' after creating subchange '152397817660s' for submission '60'
+
+2018-04-17 18:04:15.495  INF  Reset history for user 'wlm6' and task 'B2' after creating subchange '152397848866s' for submission '66'
+
+2018-04-17 18:04:15.496  INF  Reset history for user 'nss2' and task 'B2' after creating subchange '152397787853s' for submission '53'
+
+2018-04-17 18:04:15.519  INF  Reset history for user 'nhss1' and task 'B5' after creating subchange '152397794155s' for submission '55'
+
+2018-04-17 18:04:15.520  INF  Reset history for user 'nss3' and task 'B1' after creating subchange '152397822061s' for submission '61'
+
+2018-04-17 18:04:15.520  INF  Reset history for user 'dmci1' and task 'B2' after creating subchange '152397824563s' for submission '63'
+
+2018-04-17 18:04:15.521  INF  Reset history for user 'wlm6' and task 'B2' after creating subchange '152397814459s' for submission '59'
+
+2018-04-17 18:04:15.522  INF  Reset history for user 'nss2' and task 'B1' after creating subchange '152397863470s' for submission '70'
+
+2018-04-17 18:04:15.537  INF  Reset history for user 'rci1' and task 'B1' after creating subchange '152397827264s' for submission '64'
+
+2018-04-17 18:04:15.538  INF  Reset history for user 'nhss2' and task 'B2' after creating subchange '152397787552s' for submission '52'
+
+127.0.0.1 - - [2018-04-17 18:04:15] "PUT /subchanges/ HTTP/1.1" 204 124 0.059288
+127.0.0.1 - - [2018-04-17 18:04:15] "PUT /submissions/ HTTP/1.1" 204 124 0.081472
+2018-04-17 18:04:15.700  INF  Reset history for user 'gvss2' and task 'B1' after creating subchange '152397909373s' for submission '73'
+
+2018-04-17 18:04:15.701  INF  Reset history for user 'rci1' and task 'B2' after creating subchange '152397975987s' for submission '87'
+
+2018-04-17 18:04:15.703  INF  Reset history for user 'wlm6' and task 'B1' after creating subchange '1523980990112s' for submission '112'
+
+2018-04-17 18:04:15.704  INF  Reset history for user 'somci2' and task 'B1' after creating subchange '1523981209117s' for submission '117'
+
+2018-04-17 18:04:15.705  INF  Reset history for user 'dmci1' and task 'B3' after creating subchange '152398044298s' for submission '98'
+
+2018-04-17 18:04:15.707  INF  Reset history for user 'rci1' and task 'B2' after creating subchange '1523981321119s' for submission '119'
+
+2018-04-17 18:04:15.709  INF  Reset history for user 'rci1' and task 'B1' after creating subchange '1523980714106s' for submission '106'
+
+2018-04-17 18:04:15.710  INF  Reset history for user 'dmci1' and task 'B3' after creating subchange '1523980793108s' for submission '108'
+
+2018-04-17 18:04:15.712  INF  Reset history for user 'gvss2' and task 'B2' after creating subchange '1523980577104s' for submission '104'
+
+2018-04-17 18:04:15.712  INF  Reset history for user 'gvss1' and task 'B3' after creating subchange '1523980560102s' for submission '102'
+
+2018-04-17 18:04:15.714  INF  Reset history for user 'rci1' and task 'B1' after creating subchange '152397956782s' for submission '82'
+
+2018-04-17 18:04:15.715  INF  Reset history for user 'dmci1' and task 'B3' after creating subchange '152397917375s' for submission '75'
+
+2018-04-17 18:04:15.715  INF  Reset history for user 'wlm4' and task 'B3' after creating subchange '152397930177s' for submission '77'
+
+2018-04-17 18:04:15.716  INF  Reset history for user 'rci1' and task 'B1' after creating subchange '152398031296s' for submission '96'
+
+2018-04-17 18:04:15.716  INF  Reset history for user 'wlm4' and task 'B5' after creating subchange '152397978788s' for submission '88'
+
+2018-04-17 18:04:15.721  INF  Reset history for user 'nhss1' and task 'B5' after creating subchange '152398044299s' for submission '99'
+
+2018-04-17 18:04:15.722  INF  Reset history for user 'wlm2' and task 'B1' after creating subchange '1523982239137s' for submission '137'
+
+2018-04-17 18:04:15.724  INF  Reset history for user 'nhss3' and task 'B1' after creating subchange '1523980456100s' for submission '100'
+
+2018-04-17 18:04:15.737  INF  Reset history for user 'dmci1' and task 'B3' after creating subchange '152397937078s' for submission '78'
+
+2018-04-17 18:04:15.738  INF  Reset history for user 'wlm2' and task 'B1' after creating subchange '1523982379145s' for submission '145'
+
+2018-04-17 18:04:15.739  INF  Reset history for user 'wlm2' and task 'B1' after creating subchange '1523982281140s' for submission '140'
+
+2018-04-17 18:04:15.740  INF  Reset history for user 'nss3' and task 'B1' after creating subchange '152397991492s' for submission '92'
+
+2018-04-17 18:04:15.743  INF  Reset history for user 'rci1' and task 'B1' after creating subchange '1523980558101s' for submission '101'
+
+2018-04-17 18:04:15.743  INF  Reset history for user 'wci3' and task 'B1' after creating subchange '152397922776s' for submission '76'
+
+2018-04-17 18:04:15.745  INF  Reset history for user 'wlm2' and task 'B2' after creating subchange '152397991291s' for submission '91'
+
+2018-04-17 18:04:15.747  INF  Reset history for user 'rci1' and task 'B1' after creating subchange '152397952681s' for submission '81'
+
+2018-04-17 18:04:15.748  INF  Reset history for user 'nhss3' and task 'B1' after creating subchange '152397984190s' for submission '90'
+
+2018-04-17 18:04:15.749  INF  Reset history for user 'somci2' and task 'B1' after creating subchange '152398024095s' for submission '95'
+
+2018-04-17 18:04:15.750  INF  Reset history for user 'wlm6' and task 'B2' after creating subchange '1523981323120s' for submission '120'
+
+2018-04-17 18:04:15.751  INF  Reset history for user 'rci1' and task 'B2' after creating subchange '152397963483s' for submission '83'
+
+127.0.0.1 - - [2018-04-17 18:04:15] "PUT /subchanges/ HTTP/1.1" 204 124 0.067561
+127.0.0.1 - - [2018-04-17 18:04:15] "PUT /submissions/ HTTP/1.1" 204 124 0.110659
+2018-04-17 18:04:15.884  INF  Reset history for user 'somci2' and task 'B1' after creating subchange '1523983090160s' for submission '160'
+
+2018-04-17 18:04:15.886  INF  Reset history for user 'gvss2' and task 'B1' after creating subchange '1523983307170s' for submission '170'
+
+2018-04-17 18:04:15.924  INF  Reset history for user 'wci3' and task 'B1' after creating subchange '1523986045245s' for submission '245'
+
+2018-04-17 18:04:15.925  INF  Reset history for user 'gvss2' and task 'B1' after creating subchange '1523983191164s' for submission '164'
+
+2018-04-17 18:04:15.926  INF  Reset history for user 'nss1' and task 'B1' after creating subchange '1523983516176s' for submission '176'
+
+2018-04-17 18:04:15.927  INF  Reset history for user 'nhss3' and task 'B1' after creating subchange '1523984188188s' for submission '188'
+
+2018-04-17 18:04:15.928  INF  Reset history for user 'gvss2' and task 'B1' after creating subchange '1523983215165s' for submission '165'
+
+2018-04-17 18:04:15.960  INF  Reset history for user 'nhss3' and task 'B2' after creating subchange '1523986207266s' for submission '266'
+
+2018-04-17 18:04:16.000  INF  Reset history for user 'wlm2' and task 'B1' after creating subchange '1523982992156s' for submission '156'
+
+2018-04-17 18:04:16.001  INF  Reset history for user 'nhss3' and task 'B2' after creating subchange '1523986207264s' for submission '264'
+
+2018-04-17 18:04:16.048  INF  Reset history for user 'nhss3' and task 'B2' after creating subchange '1523986207262s' for submission '262'
+
+2018-04-17 18:04:16.049  INF  Reset history for user 'wlm2' and task 'B1' after creating subchange '1523982683150s' for submission '150'
+
+2018-04-17 18:04:16.050  INF  Reset history for user 'wlm4' and task 'B3' after creating subchange '1523986050247s' for submission '247'
+
+2018-04-17 18:04:16.112  INF  Reset history for user 'nhss1' and task 'B1' after creating subchange '1523984746202s' for submission '202'
+
+2018-04-17 18:04:16.114  INF  Reset history for user 'nss3' and task 'B1' after creating subchange '1523985313219s' for submission '219'
+
+2018-04-17 18:04:16.115  INF  Reset history for user 'nhss3' and task 'B2' after creating subchange '1523986177258s' for submission '258'
+
+2018-04-17 18:04:16.116  INF  Reset history for user 'nhss3' and task 'B2' after creating subchange '1523986208265s' for submission '265'
+
+2018-04-17 18:04:16.117  INF  Reset history for user 'nhss3' and task 'B2' after creating subchange '1523986205261s' for submission '261'
+
+2018-04-17 18:04:16.117  INF  Reset history for user 'nss3' and task 'B1' after creating subchange '1523984705200s' for submission '200'
+
+2018-04-17 18:04:16.118  INF  Reset history for user 'wlm2' and task 'B1' after creating subchange '1523982980155s' for submission '155'
+
+2018-04-17 18:04:16.119  INF  Reset history for user 'wlm6' and task 'B1' after creating subchange '1523986269273s' for submission '273'
+
+2018-04-17 18:04:16.134  INF  Reset history for user 'wlm2' and task 'B1' after creating subchange '1523982620149s' for submission '149'
+
+2018-04-17 18:04:16.142  INF  Reset history for user 'nhss2' and task 'B1' after creating subchange '1523986188259s' for submission '259'
+
+2018-04-17 18:04:16.145  INF  Reset history for user 'wci4' and task 'B1' after creating subchange '1523986174255s' for submission '255'
+
+2018-04-17 18:04:16.149  INF  Reset history for user 'nss3' and task 'B1' after creating subchange '1523982828152s' for submission '152'
+
+2018-04-17 18:04:16.152  INF  Reset history for user 'nhss3' and task 'B2' after creating subchange '1523986207267s' for submission '267'
+
+2018-04-17 18:04:16.155  INF  Reset history for user 'nhss3' and task 'B2' after creating subchange '1523986207263s' for submission '263'
+
+2018-04-17 18:04:16.161  INF  Reset history for user 'wci3' and task 'B1' after creating subchange '1523986090249s' for submission '249'
+
+2018-04-17 18:04:16.162  INF  Reset history for user 'wci4' and task 'B1' after creating subchange '1523986263272s' for submission '272'
+
+2018-04-17 18:04:16.163  INF  Reset history for user 'nhss1' and task 'B1' after creating subchange '1523984746201s' for submission '201'
+
+127.0.0.1 - - [2018-04-17 18:04:16] "PUT /subchanges/ HTTP/1.1" 204 124 0.281687

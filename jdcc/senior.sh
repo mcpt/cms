@@ -1,1 +1,1 @@
-sudo cmsResourceService -a $1 &
+sudo cmsResourceService -a $1 &> err.log &
